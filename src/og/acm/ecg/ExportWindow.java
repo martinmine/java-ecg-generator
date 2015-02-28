@@ -14,7 +14,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
-public class EcgExportWindow extends javax.swing.JDialog {
+public class ExportWindow extends javax.swing.JDialog {
     private javax.swing.JRadioButton csvRB;
     private javax.swing.JTextArea exportFile;
     private javax.swing.JRadioButton tabRB;
@@ -25,12 +25,12 @@ public class EcgExportWindow extends javax.swing.JDialog {
     /**
      * Creates new form EcgExportWindow
      */
-    public EcgExportWindow(java.awt.Frame parent, boolean modal, EcgParam parameters, EcgCalc ecgCalcOb, EcgLogWindow logOb) {
+    public ExportWindow(java.awt.Frame parent, boolean modal, EcgParameters parameters, EcgCalc ecgCalcOb, LogWindow logOb) {
         super(parent, modal);
         initComponents();
-        EcgParam paramOb = parameters;
+        EcgParameters paramOb = parameters;
         calcOb = ecgCalcOb;
-        EcgLogWindow ecgLog = logOb;
+        LogWindow ecgLog = logOb;
         initWindow();
     }
 
@@ -87,19 +87,19 @@ public class EcgExportWindow extends javax.swing.JDialog {
         jLabel1.setBounds(13, 150, 120, 15);
 
         browseButton.setText("Browse...");
-        browseButton.addActionListener(EcgExportWindow.this::browseButtonActionPerformed);
+        browseButton.addActionListener(ExportWindow.this::browseButtonActionPerformed);
 
         mainPanel.add(browseButton);
         browseButton.setBounds(247, 140, 100, 25);
 
         exportButton.setText("Export Data");
-        exportButton.addActionListener(EcgExportWindow.this::exportButtonActionPerformed);
+        exportButton.addActionListener(ExportWindow.this::exportButtonActionPerformed);
 
         mainPanel.add(exportButton);
         exportButton.setBounds(140, 280, 120, 25);
 
         closeButton.setText("Close");
-        closeButton.addActionListener(EcgExportWindow.this::CloseButtonActionPerformed);
+        closeButton.addActionListener(ExportWindow.this::CloseButtonActionPerformed);
 
         mainPanel.add(closeButton);
         closeButton.setBounds(270, 280, 73, 25);

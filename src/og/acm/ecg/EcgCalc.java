@@ -53,15 +53,15 @@ public class EcgCalc {
     private int[] ecgResultPeak;
     private int ecgResultNumRows;
     /* Object Variables */
-    private EcgParam paramOb;
-    private EcgLogWindow ecgLog;
+    private EcgParameters paramOb;
+    private LogWindow ecgLog;
 
     /**
      * Creates a new instance of EcgCalc
      * @param parameters
      * @param logOb
      */
-    public EcgCalc(EcgParam parameters, EcgLogWindow logOb) {
+    public EcgCalc(EcgParameters parameters, LogWindow logOb) {
         paramOb = parameters;
         ecgLog = logOb;
 

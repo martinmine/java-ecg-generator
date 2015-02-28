@@ -12,13 +12,13 @@ import java.awt.event.ActionEvent;
  * @author Mauricio Villarroel (m.villarroel@acm.og)
  */
 
-public class EcgAboutWindow extends javax.swing.JDialog {
+public class AboutWindow extends javax.swing.JDialog {
 
     private JEditorPane txtEditor;
     /**
      * Creates new form aboutECG
      */
-    public EcgAboutWindow(Frame parent, boolean modal) {
+    public AboutWindow(Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
         this.setSize(400, 530);
@@ -50,7 +50,7 @@ public class EcgAboutWindow extends javax.swing.JDialog {
         jDesktopPane1.add(jLabel1, JLayeredPane.DEFAULT_LAYER);
 
         okButton.setText("OK");
-        okButton.addActionListener(EcgAboutWindow.this::okButtonActionPerformed);
+        okButton.addActionListener(AboutWindow.this::okButtonActionPerformed);
 
         okButton.setBounds(140, 450, 73, 25);
         jDesktopPane1.add(okButton, JLayeredPane.DEFAULT_LAYER);

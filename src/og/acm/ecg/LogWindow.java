@@ -20,7 +20,7 @@ import java.io.IOException;
 import java.text.DateFormat;
 import java.util.Date;
 
-public class EcgLogWindow extends JFrame {
+public class LogWindow extends JFrame {
 
     private final DateFormat shortTime = DateFormat.getTimeInstance();
     private final DateFormat longDateTime = DateFormat.getDateTimeInstance();
@@ -29,7 +29,7 @@ public class EcgLogWindow extends JFrame {
     /**
      * Creates new form ecgLogWindow
      */
-    public EcgLogWindow() {
+    public LogWindow() {
         initComponents();
         startLog();
         this.setSize(740, 460);
@@ -90,20 +90,20 @@ public class EcgLogWindow extends JFrame {
 
         clearButton.setFont(new java.awt.Font("Microsoft Sans Serif", 0, 11));
         clearButton.setText("Clear");
-        clearButton.addActionListener(EcgLogWindow.this::clearButtonActionPerformed);
+        clearButton.addActionListener(LogWindow.this::clearButtonActionPerformed);
 
         jPanel1.add(clearButton);
         clearButton.setBounds(540, 400, 80, 25);
 
         closeButton.setText("Close");
-        closeButton.addActionListener(EcgLogWindow.this::closeButtonActionPerformed);
+        closeButton.addActionListener(LogWindow.this::closeButtonActionPerformed);
 
         jPanel1.add(closeButton);
         closeButton.setBounds(640, 400, 80, 25);
 
         saveButton.setFont(new java.awt.Font("MS Sans Serif", 0, 10));
         saveButton.setText("Save log");
-        saveButton.addActionListener(EcgLogWindow.this::saveButtonActionPerformed);
+        saveButton.addActionListener(LogWindow.this::saveButtonActionPerformed);
 
         jPanel1.add(saveButton);
         saveButton.setBounds(420, 400, 100, 25);

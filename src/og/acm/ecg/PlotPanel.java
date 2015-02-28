@@ -21,7 +21,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.Vector;
 
-public class EcgPlotWindow extends JPanel implements AdjustmentListener {
+public class PlotPanel extends JPanel implements AdjustmentListener {
 
     /**
      * These constants used in drawText() method for placement 
@@ -96,14 +96,14 @@ public class EcgPlotWindow extends JPanel implements AdjustmentListener {
     private JButton zoomInButton;
     private JButton zoomOutButton;
     private final EcgCalc calcOb;
-    private final EcgParam paramOb;
-    private final EcgLogWindow ecgLog;
+    private final EcgParameters paramOb;
+    private final LogWindow ecgLog;
     private javax.swing.table.DefaultTableModel tableValuesModel;
     private ecgPanel ecgFrame;
     /**
      * Creates new form plotWindow
      */
-    public EcgPlotWindow(EcgParam parameters, EcgLogWindow logOb) {
+    public PlotPanel(EcgParameters parameters, LogWindow logOb) {
         this.paramOb = parameters;
         this.calcOb = new EcgCalc(paramOb, logOb);
         this.ecgLog = logOb;
@@ -290,13 +290,13 @@ public class EcgPlotWindow extends JPanel implements AdjustmentListener {
         exportButton.setText("Export Data...");
         exportButton.setToolTipText("Export Table Data to a File");
         exportButton.setIconTextGap(15);
-        exportButton.addActionListener(EcgPlotWindow.this::exportButtonActionPerformed);
+        exportButton.addActionListener(PlotPanel.this::exportButtonActionPerformed);
 
         mainPanel.add(exportButton);
         exportButton.setBounds(660, 343, 180, 25);
 
         clearButton.setText("Clear");
-        clearButton.addActionListener(EcgPlotWindow.this::clearButtonActionPerformed);
+        clearButton.addActionListener(PlotPanel.this::clearButtonActionPerformed);
 
         mainPanel.add(clearButton);
         clearButton.setBounds(630, 380, 80, 25);
@@ -317,7 +317,7 @@ public class EcgPlotWindow extends JPanel implements AdjustmentListener {
     }//GEN-LAST:event_clearButtonActionPerformed
 
     private void exportButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exportButtonActionPerformed
-        EcgExportWindow exportWin = new EcgExportWindow(null, true, paramOb, calcOb, ecgLog);
+        ExportWindow exportWin = new ExportWindow(null, true, paramOb, calcOb, ecgLog);
         exportWin.setVisible(true);
     }//GEN-LAST:event_exportButtonActionPerformed
     // End of variables declaration//GEN-END:variables
@@ -638,7 +638,7 @@ public class EcgPlotWindow extends JPanel implements AdjustmentListener {
                     if (curSecond > lastSecond) {
                         lastSecond = curSecond;
                         // Convert the x value to a string
-                        strValue = EcgFormatNumber.toString(Double.valueOf(tableValues.getValueAt(i, 0).toString()), upLimit, loLimit, 2);
+                        strValue = NumberFormatter.toString(Double.valueOf(tableValues.getValueAt(i, 0).toString()), upLimit, loLimit, 2);
                         /*
                          * Plot the X axes number values (the Time).
                          */
@@ -689,7 +689,7 @@ public class EcgPlotWindow extends JPanel implements AdjustmentListener {
                  * Plot the X axes number values (the Time).
                  */
                 ga.setColor(axesNumColor);
-                drawText(ga, EcgFormatNumber.toString(Double.valueOf(tableValues.getValueAt(ecgAnimateCurRow, 0).toString()), upLimit, loLimit, 2),
+                drawText(ga, NumberFormatter.toString(Double.valueOf(tableValues.getValueAt(ecgAnimateCurRow, 0).toString()), upLimit, loLimit, 2),
                         x, horizontalScaleY, horizontalScaleWidth, horizontalScaleHeight,
                         fScaleNumSize, LEFT);
 

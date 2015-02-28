@@ -14,16 +14,16 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 
-public class EcgApplication extends javax.swing.JFrame {
+public class MainApplication extends javax.swing.JFrame {
     /* Main GUI-Window Objects*/
-    private EcgPlotWindow plotWin;
-    private EcgParamWindow paramWin;
-    private EcgLogWindow logWin;
+    private PlotPanel plotWin;
+    private ParameterWindow paramWin;
+    private LogWindow logWin;
 
     /**
      * Creates new form ecgApplication
      */
-    public EcgApplication() {
+    public MainApplication() {
         initComponents();
         initClasses();
         initWindow();
@@ -41,7 +41,7 @@ public class EcgApplication extends javax.swing.JFrame {
             throw new RuntimeException(e);
         }
 
-        EcgApplication app = new EcgApplication();
+        MainApplication app = new MainApplication();
         app.setVisible(true);
         app.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
     }
@@ -51,11 +51,11 @@ public class EcgApplication extends javax.swing.JFrame {
      */
     private void initClasses() {
         /* Main Calculation Objects */
-        final EcgParam paramOb = new EcgParam();
+        final EcgParameters paramOb = new EcgParameters();
 
-        this.logWin = new EcgLogWindow();
-        this.paramWin = new EcgParamWindow(paramOb, logWin);
-        this.plotWin = new EcgPlotWindow(paramOb, logWin);
+        this.logWin = new LogWindow();
+        this.paramWin = new ParameterWindow(paramOb, logWin);
+        this.plotWin = new PlotPanel(paramOb, logWin);
     }
 
     private void initWindow() {
@@ -76,7 +76,7 @@ public class EcgApplication extends javax.swing.JFrame {
 
         JButton aboutBtn = new JButton("About");
         aboutBtn.addActionListener((ActionEvent e) -> {
-            EcgAboutWindow aboutDialog = new EcgAboutWindow(this, true);
+            AboutWindow aboutDialog = new AboutWindow(this, true);
             aboutDialog.setVisible(true);
         });
 

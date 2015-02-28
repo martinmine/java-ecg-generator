@@ -9,7 +9,7 @@ package og.acm.ecg;/*
  *         Part of of this code was taken from the ECG C version
  * @Copyright Patrick McSharry and Gari Clifford.
  */
-public class EcgParam {
+public class EcgParameters {
 
     /**
      * Number of heart beats
@@ -100,7 +100,7 @@ public class EcgParam {
     /**
      * Creates a new instance of EcgParam
      */
-    public EcgParam() {
+    public EcgParameters() {
         resetParameters();
     }
 

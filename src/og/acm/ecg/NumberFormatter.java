@@ -12,7 +12,7 @@ package og.acm.ecg;/*
 
 import java.text.DecimalFormat;
 
-public class EcgFormatNumber {
+public class NumberFormatter {
 
     private static final DecimalFormat dec1 = new DecimalFormat("0.0");
     private static final DecimalFormat dec2 = new DecimalFormat("0.00");

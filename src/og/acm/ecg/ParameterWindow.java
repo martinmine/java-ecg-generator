@@ -14,7 +14,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
-public class EcgParamWindow extends JFrame {
+public class ParameterWindow extends JFrame {
     private javax.swing.JTable aiTable;
     private javax.swing.JTable biTable;
     private javax.swing.JTable tiTable;
@@ -31,12 +31,12 @@ public class EcgParamWindow extends JFrame {
     private javax.swing.JTextField txtSeed;
     private javax.swing.JTextField txtSf;
     private javax.swing.JTextField txtSfEcg;
-    private EcgParam paramOb;
-    private final EcgLogWindow ecgLog;
+    private EcgParameters paramOb;
+    private final LogWindow ecgLog;
     /**
      * Creates new form paramWindow
      */
-    public EcgParamWindow(EcgParam parameters, EcgLogWindow logOb) {
+    public ParameterWindow(EcgParameters parameters, LogWindow logOb) {
         initComponents();
         this.setSize(450, 410);
         paramOb = parameters;
@@ -459,28 +459,28 @@ public class EcgParamWindow extends JFrame {
 
         closeParamDialogButton.setFont(new java.awt.Font("MS Sans Serif", 0, 10));
         closeParamDialogButton.setText("Close");
-        closeParamDialogButton.addActionListener(EcgParamWindow.this::closeParamDialogButtonActionPerformed);
+        closeParamDialogButton.addActionListener(ParameterWindow.this::closeParamDialogButtonActionPerformed);
 
         jPanel2.add(closeParamDialogButton);
         closeParamDialogButton.setBounds(350, 340, 80, 25);
 
         resetParamDialogButton.setFont(new java.awt.Font("MS Sans Serif", 0, 10));
         resetParamDialogButton.setText("Reset");
-        resetParamDialogButton.addActionListener(EcgParamWindow.this::resetParamDialogButtonActionPerformed);
+        resetParamDialogButton.addActionListener(ParameterWindow.this::resetParamDialogButtonActionPerformed);
 
         jPanel2.add(resetParamDialogButton);
         resetParamDialogButton.setBounds(10, 340, 80, 25);
 
         saveButton.setFont(new java.awt.Font("MS Sans Serif", 0, 10));
         saveButton.setText("Save Values");
-        saveButton.addActionListener(EcgParamWindow.this::saveButtonActionPerformed);
+        saveButton.addActionListener(ParameterWindow.this::saveButtonActionPerformed);
 
         jPanel2.add(saveButton);
         saveButton.setBounds(220, 340, 100, 25);
 
         applyButton.setFont(new java.awt.Font("MS Sans Serif", 0, 10));
         applyButton.setText("Apply");
-        applyButton.addActionListener(EcgParamWindow.this::applyButtonActionPerformed);
+        applyButton.addActionListener(ParameterWindow.this::applyButtonActionPerformed);
 
         jPanel2.add(applyButton);
         applyButton.setBounds(110, 340, 80, 25);
