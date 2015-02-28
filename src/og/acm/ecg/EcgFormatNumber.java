@@ -14,23 +14,19 @@ import java.text.DecimalFormat;
 
 public class EcgFormatNumber {
 
-    final static DecimalFormat dec1 = new DecimalFormat("0.0");
-    final static DecimalFormat dec2 = new DecimalFormat("0.00");
+    private static final DecimalFormat dec1 = new DecimalFormat("0.0");
+    private static final DecimalFormat dec2 = new DecimalFormat("0.00");
 
-    final static DecimalFormat sci1 = new DecimalFormat("0.0E0");
-    final static DecimalFormat sci2 = new DecimalFormat("0.00E0");
+    private static final DecimalFormat sci1 = new DecimalFormat("0.0E0");
+    private static final DecimalFormat sci2 = new DecimalFormat("0.00E0");
 
     /*
      * Formats the 'number' parameter and returns it as a String.
      * precision = number of decimal places in the output.
      */
-    public static String toString(double number,
-                                  double upLimit,
-                                  double loLimit,
-                                  int precision) {
+    public static String toString(double number, double upLimit, double loLimit, int precision) {
         // If number less than decimalLimit, or equal to zero, use decimal style
-        if (number == 0.0 ||
-                (Math.abs(number) <= upLimit && Math.abs(number) > loLimit)) {
+        if (number == 0.0 || (Math.abs(number) <= upLimit && Math.abs(number) > loLimit)) {
             switch (precision) {
                 case 1:
                     return dec1.format(number);

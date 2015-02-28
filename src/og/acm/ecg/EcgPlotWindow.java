@@ -10,6 +10,9 @@ package og.acm.ecg;/*
  */
 
 import javax.swing.*;
+import javax.swing.border.BevelBorder;
+import javax.swing.border.EtchedBorder;
+import javax.swing.border.TitledBorder;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.AdjustmentEvent;
@@ -21,80 +24,57 @@ import java.util.Vector;
 public class EcgPlotWindow extends JPanel implements AdjustmentListener {
 
     /**
-     * ******************************************
-     * These constants used in drawText() method
-     * for placement of the text within a given
-     * rectangular area.
-     * *******************************************
+     * These constants used in drawText() method for placement 
+     * of the text within a given rectangular area.
      */
-    final int CENTER = 0;
-    final int LEFT = 1;
-    final int RIGHT = 2;
+    private static final int CENTER = 0;
+    private static final int LEFT = 1;
+    private static final int RIGHT = 2;
+    
     /**
-     * ****************
      * Frame Dimensions.
-     * *****************
      */
-    final int posFrameX = 0;
-    final int posFrameY = 1;
-    final int frameHeight = 290;
-    final int frameAmplitude = frameHeight / 2;
+    private final int posFrameY = 1;
+    private final int frameHeight = 290;
+    private final int frameAmplitude = frameHeight / 2;
+    
     //Coordinates Origin
-    final int posOriginY = posFrameY + (frameHeight / 2);
+    private final int posOriginY = posFrameY + (frameHeight / 2);
+    
     //X coordinates
-    final int horzScaleY = posFrameY + frameHeight;
-    final int horzScaleWidth = 100;
-    final int horzScaleHeight = 20;
-    final int fScaleNumSize = 9;
+    private final int horizontalScaleY = posFrameY + frameHeight;
+    private final int horizontalScaleWidth = 100;
+    private final int horizontalScaleHeight = 20;
+    private final int fScaleNumSize = 9;
+    
     /**
-     * ***********************************
-     * Colors for the Plotting Components *
-     * ************************************
+     * Colors for the Plotting Components
      */
-    protected Color ecgPlotColor = Color.BLUE;
-    protected Color frameLineColor = Color.BLACK;
-    protected Color frameInsideLineColor = Color.LIGHT_GRAY;
-    protected Color frameFillColor = Color.WHITE;
-    protected Color axesNumColor = Color.GRAY;
-    protected Color titleColor = Color.BLACK;
-    protected Color bgColor = Color.WHITE;
+    private final Color ecgPlotColor = Color.BLUE;
+    private final Color frameLineColor = Color.BLACK;
+    private final Color frameInsideLineColor = Color.LIGHT_GRAY;
+    private final Color axesNumColor = Color.GRAY;
+    
     /**
-     * *************************************************
      * Limit below which scale values use decimal format,
      * above which they use scientific format.
-     * **************************************************
      */
-    double upLimit = 100.0;
-    double loLimit = 0.01;
+    private final double upLimit = 100.0;
+    private final double loLimit = 0.01;
 
     /**
-     * ***************************
-     * Ploting variables
-     * ****************************
+     * Plotting variables
      */
-    boolean readyToPlot;
-    int plotScrollBarValue;
-    double plotZoom = 0.008;
-    double plotZoomInc = 2;
-    Timer ecgAnimateTimer;
-    /* For plotting */
-    Point ecgAnimateLastPoint = new java.awt.Point(0, 0);
-    /* Flag Variable, show if data has been generated. */
-    private boolean ecgGenerated = false;
+    private boolean readyToPlot;
+    private int plotScrollBarValue;
+    private double plotZoom = 0.008;
+    private final double plotZoomInc = 2;
+    private Timer ecgAnimateTimer;
+    private final Point ecgAnimateLastPoint = new java.awt.Point(0, 0);
+    
     /**
-     * ****************************
-     * Variable for the Data table
-     * *****************************
-     */
-    private String[] peakStr = {"", "P", "Q", "R", "S", "T"};
-    /**
-     * ***************************************
      * Variables to Animate ECG
-     * ****************************************
      */
-    //Animating in process?
-    private boolean ecgAnimateFlg = false;
-    private long ecgAnimateInterval;
     /* Total plotting Data Table Row */
     private int ecgAnimateNumRows;
     /* Current plotting Data Table Row */
@@ -103,69 +83,45 @@ public class EcgPlotWindow extends JPanel implements AdjustmentListener {
     private int ecgAnimatePanelWidth;
     /* Starting X axis value to plot*/
     private int ecgAnimateInitialZero;
-    // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JScrollPane TableScrollPane;
-    private javax.swing.JButton animateStartButton;
-    private javax.swing.JButton animateStopButton;
-    private javax.swing.JButton clearButton;
-    private javax.swing.JButton closeButton;
-    private javax.swing.JScrollPane ecgPlotArea;
-    private javax.swing.JButton exportButton;
-    private javax.swing.JButton generateButton;
-    private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel2;
-    private javax.swing.JLabel jLabel3;
-    private javax.swing.JSeparator jSeparator1;
-    private javax.swing.JSeparator jSeparator2;
-    private javax.swing.JSeparator jSeparator3;
-    private javax.swing.JSeparator jSeparator4;
-    private javax.swing.JTextArea jTextArea1;
-    private javax.swing.JLabel lblMaxAmplitude;
-    private javax.swing.JLabel lblMinAmplitude;
-    private javax.swing.JLabel lblOrigin;
-    private javax.swing.JPanel mainPanel;
-    private javax.swing.JScrollBar plotScrollBar;
-    private javax.swing.JToolBar plotToolBar;
-    private javax.swing.JTable tableValues;
-    private javax.swing.JButton zoomInButton;
-    private javax.swing.JButton zoomOutButton;
-    private EcgCalc calcOb;
-    private EcgParam paramOb;
-    private EcgLogWindow ecgLog;
+    private JButton animateStartButton;
+    private JButton animateStopButton;
+    private JButton clearButton;
+    private JScrollPane ecgPlotArea;
+    private JButton exportButton;
+    private JButton generateButton;
+    private JLabel lblMaxAmplitude;
+    private JLabel lblMinAmplitude;
+    private JScrollBar plotScrollBar;
+    private JTable tableValues;
+    private JButton zoomInButton;
+    private JButton zoomOutButton;
+    private final EcgCalc calcOb;
+    private final EcgParam paramOb;
+    private final EcgLogWindow ecgLog;
     private javax.swing.table.DefaultTableModel tableValuesModel;
     private ecgPanel ecgFrame;
-    private EcgApplication mainApp;
     /**
      * Creates new form plotWindow
      */
-    public EcgPlotWindow(EcgParam parameters, EcgLogWindow logOb, EcgApplication application) {
+    public EcgPlotWindow(EcgParam parameters, EcgLogWindow logOb) {
+        this.paramOb = parameters;
+        this.calcOb = new EcgCalc(paramOb, logOb);
+        this.ecgLog = logOb;
+        
         initComponents();
-        paramOb = parameters;
-        calcOb = new EcgCalc(paramOb, logOb);
-        ecgLog = logOb;
-        mainApp = application;
         initWindow();
     }
 
     private void initWindow() {
         this.setSize(850, 475);
-        /*********************
-         *Init the main Window
-         *Set maximize
-         *********************/
-        /*try{
-            ecgWindow.setMaximum(true);
-        } catch(java.beans.PropertyVetoException e){
-            txtStatus.append("Exception Error : " + e + "\n");
-        }*/
 
-        /*********************
-         *Init the data Table
-         *********************/
+        /**
+         * Init the data Table
+         */
         tableValuesModel = new DefaultTableModel(new Object[][]{},
                 new String[]{"Time", "Voltage", "Peak"}) {
-            Class[] types = new Class[]{
-                    java.lang.String.class, java.lang.String.class, java.lang.String.class
+            final Class[] types = new Class[]{
+                    String.class, String.class, String.class
             };
 
             public Class getColumnClass(int columnIndex) {
@@ -182,150 +138,120 @@ public class EcgPlotWindow extends JPanel implements AdjustmentListener {
         /* Set the ScrollBar */
         plotScrollBar.addAdjustmentListener(this);
 
-        /*************************
-         * Reset all Application
-         * to a init state.
-         *************************/
+        /**
+         * Reset all Application to an initialized state.
+         */
         resetECG();
     }
 
     /**
-     * This method is called from within the constructor to
-     * initialize the form.
-     * WARNING: Do NOT modify this code. The content of this method is
-     * always regenerated by the Form Editor.
+     * This method is called from within the constructor to initialize the form.
      */
-    private void initComponents() {//GEN-BEGIN:initComponents
-        plotToolBar = new javax.swing.JToolBar();
-        jSeparator2 = new javax.swing.JSeparator();
-        jLabel3 = new javax.swing.JLabel();
-        generateButton = new javax.swing.JButton();
-        jSeparator4 = new javax.swing.JSeparator();
-        jLabel2 = new javax.swing.JLabel();
-        zoomInButton = new javax.swing.JButton();
-        zoomOutButton = new javax.swing.JButton();
-        jSeparator3 = new javax.swing.JSeparator();
-        jLabel1 = new javax.swing.JLabel();
-        animateStartButton = new javax.swing.JButton();
-        animateStopButton = new javax.swing.JButton();
-        jSeparator1 = new javax.swing.JSeparator();
-        mainPanel = new javax.swing.JPanel();
-        ecgPlotArea = new javax.swing.JScrollPane();
-        plotScrollBar = new javax.swing.JScrollBar();
-        lblMinAmplitude = new javax.swing.JLabel();
-        lblOrigin = new javax.swing.JLabel();
-        lblMaxAmplitude = new javax.swing.JLabel();
-        jTextArea1 = new javax.swing.JTextArea();
-        TableScrollPane = new javax.swing.JScrollPane();
-        tableValues = new javax.swing.JTable();
-        closeButton = new javax.swing.JButton();
-        exportButton = new javax.swing.JButton();
-        clearButton = new javax.swing.JButton();
+    private void initComponents() {
+        JToolBar plotToolBar = new JToolBar();
+        JSeparator jSeparator2 = new JSeparator();
+        JLabel jLabel3 = new JLabel();
+        generateButton = new JButton();
+        JSeparator jSeparator4 = new JSeparator();
+        JLabel jLabel2 = new JLabel();
+        zoomInButton = new JButton();
+        zoomOutButton = new JButton();
+        JSeparator jSeparator3 = new JSeparator();
+        JLabel jLabel1 = new JLabel();
+        animateStartButton = new JButton();
+        animateStopButton = new JButton();
+        JSeparator jSeparator1 = new JSeparator();
+        JPanel mainPanel = new JPanel();
+        ecgPlotArea = new JScrollPane();
+        plotScrollBar = new JScrollBar();
+        lblMinAmplitude = new JLabel();
+        JLabel lblOrigin = new JLabel();
+        lblMaxAmplitude = new JLabel();
+        JTextArea jTextArea1 = new JTextArea();
+        JScrollPane tableScrollPane = new JScrollPane();
+        tableValues = new JTable();
+        JButton closeButton = new JButton();
+        exportButton = new JButton();
+        clearButton = new JButton();
 
         setLayout(new BorderLayout());
-        plotToolBar.setBorder(new javax.swing.border.EtchedBorder(null, java.awt.Color.lightGray));
+        plotToolBar.setBorder(new EtchedBorder(null, Color.lightGray));
         plotToolBar.setRollover(true);
-        plotToolBar.setMinimumSize(new java.awt.Dimension(234, 30));
-        plotToolBar.setPreferredSize(new java.awt.Dimension(234, 30));
+        plotToolBar.setMinimumSize(new Dimension(234, 30));
+        plotToolBar.setPreferredSize(new Dimension(234, 30));
         plotToolBar.setAutoscrolls(true);
-        jSeparator2.setMaximumSize(new java.awt.Dimension(1000, 32767));
+        jSeparator2.setMaximumSize(new Dimension(1000, 32767));
         plotToolBar.add(jSeparator2);
 
         jLabel3.setText("Generate:");
         plotToolBar.add(jLabel3);
 
-        generateButton.setIcon(new javax.swing.ImageIcon("RES/img/execute2.gif"));
+        generateButton.setIcon(new ImageIcon("RES/img/execute2.gif"));
         generateButton.setToolTipText("Generate System");
-        generateButton.setMaximumSize(new java.awt.Dimension(22, 22));
-        generateButton.setMinimumSize(new java.awt.Dimension(22, 22));
-        generateButton.setPreferredSize(new java.awt.Dimension(22, 22));
-        generateButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                generateButtonActionPerformed(evt);
-            }
-        });
+        generateButton.setMaximumSize(new Dimension(22, 22));
+        generateButton.setMinimumSize(new Dimension(22, 22));
+        generateButton.setPreferredSize(new Dimension(22, 22));
+        generateButton.addActionListener(this::generateButtonActionPerformed);
 
         plotToolBar.add(generateButton);
 
-        jSeparator4.setMaximumSize(new java.awt.Dimension(1000, 32767));
+        jSeparator4.setMaximumSize(new Dimension(1000, 32767));
         plotToolBar.add(jSeparator4);
 
         jLabel2.setText("Zoom:");
         plotToolBar.add(jLabel2);
 
-        zoomInButton.setIcon(new javax.swing.ImageIcon("res/img/tbzoomin.png"));
+        zoomInButton.setIcon(new ImageIcon("res/img/tbzoomin.png"));
         zoomInButton.setToolTipText("Zoom In");
-        zoomInButton.setMargin(new java.awt.Insets(0, 0, 0, 0));
-        zoomInButton.setMaximumSize(new java.awt.Dimension(22, 22));
-        zoomInButton.setMinimumSize(new java.awt.Dimension(22, 22));
-        zoomInButton.setPreferredSize(new java.awt.Dimension(22, 22));
-        zoomInButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                zoomInButtonActionPerformed(evt);
-            }
-        });
-
+        zoomInButton.setMargin(new Insets(0, 0, 0, 0));
+        zoomInButton.setMaximumSize(new Dimension(22, 22));
+        zoomInButton.setMinimumSize(new Dimension(22, 22));
+        zoomInButton.setPreferredSize(new Dimension(22, 22));
+        zoomInButton.addActionListener(this::zoomInButtonActionPerformed);
         plotToolBar.add(zoomInButton);
 
-        zoomOutButton.setIcon(new javax.swing.ImageIcon("res/img/tbzoomout.png"));
+        zoomOutButton.setIcon(new ImageIcon("res/img/tbzoomout.png"));
         zoomOutButton.setToolTipText("Zoom Out");
-        zoomOutButton.setMaximumSize(new java.awt.Dimension(22, 22));
-        zoomOutButton.setMinimumSize(new java.awt.Dimension(22, 22));
-        zoomOutButton.setPreferredSize(new java.awt.Dimension(22, 22));
-        zoomOutButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                zoomOutButtonActionPerformed(evt);
-            }
-        });
-
+        zoomOutButton.setMaximumSize(new Dimension(22, 22));
+        zoomOutButton.setMinimumSize(new Dimension(22, 22));
+        zoomOutButton.setPreferredSize(new Dimension(22, 22));
+        zoomOutButton.addActionListener(this::zoomOutButtonActionPerformed);
         plotToolBar.add(zoomOutButton);
 
-        jSeparator3.setMaximumSize(new java.awt.Dimension(1000, 32767));
+        jSeparator3.setMaximumSize(new Dimension(1000, 32767));
         plotToolBar.add(jSeparator3);
 
         jLabel1.setText("Animate:");
         plotToolBar.add(jLabel1);
 
-        animateStartButton.setIcon(new javax.swing.ImageIcon("res/img/ball_green.gif"));
+        animateStartButton.setIcon(new ImageIcon("res/img/ball_green.gif"));
         animateStartButton.setToolTipText("Start Animation");
-        animateStartButton.setMaximumSize(new java.awt.Dimension(22, 22));
-        animateStartButton.setMinimumSize(new java.awt.Dimension(22, 22));
-        animateStartButton.setPreferredSize(new java.awt.Dimension(22, 22));
-        animateStartButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                animateStartButtonActionPerformed(evt);
-            }
-        });
-
+        animateStartButton.setMaximumSize(new Dimension(22, 22));
+        animateStartButton.setMinimumSize(new Dimension(22, 22));
+        animateStartButton.setPreferredSize(new Dimension(22, 22));
+        animateStartButton.addActionListener(this::animateStartButtonActionPerformed);
         plotToolBar.add(animateStartButton);
 
-        animateStopButton.setIcon(new javax.swing.ImageIcon("res/img/ball_red.gif"));
+        animateStopButton.setIcon(new ImageIcon("res/img/ball_red.gif"));
         animateStopButton.setToolTipText("Stop Animation");
-        animateStopButton.setMaximumSize(new java.awt.Dimension(22, 22));
-        animateStopButton.setMinimumSize(new java.awt.Dimension(22, 22));
-        animateStopButton.setPreferredSize(new java.awt.Dimension(22, 22));
-        animateStopButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                animateStopButtonActionPerformed(evt);
-            }
-        });
-
+        animateStopButton.setMaximumSize(new Dimension(22, 22));
+        animateStopButton.setMinimumSize(new Dimension(22, 22));
+        animateStopButton.setPreferredSize(new Dimension(22, 22));
+        animateStopButton.addActionListener(this::animateStopButtonActionPerformed);
         plotToolBar.add(animateStopButton);
 
         plotToolBar.add(jSeparator1);
-
-        add(plotToolBar, java.awt.BorderLayout.NORTH);
-
+        add(plotToolBar, BorderLayout.NORTH);
         mainPanel.setLayout(null);
 
-        ecgPlotArea.setBorder(new javax.swing.border.TitledBorder(new javax.swing.border.BevelBorder(javax.swing.border.BevelBorder.RAISED), "Plot Area", javax.swing.border.TitledBorder.CENTER, javax.swing.border.TitledBorder.ABOVE_TOP));
-        ecgPlotArea.setHorizontalScrollBarPolicy(javax.swing.JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-        ecgPlotArea.setVerticalScrollBarPolicy(javax.swing.JScrollPane.VERTICAL_SCROLLBAR_NEVER);
+        ecgPlotArea.setBorder(new TitledBorder(new BevelBorder(BevelBorder.RAISED), "Plot Area", TitledBorder.CENTER, TitledBorder.ABOVE_TOP));
+        ecgPlotArea.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        ecgPlotArea.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
         mainPanel.add(ecgPlotArea);
         ecgPlotArea.setBounds(73, 2, 580, 350);
 
         plotScrollBar.setMaximum(0);
-        plotScrollBar.setOrientation(javax.swing.JScrollBar.HORIZONTAL);
+        plotScrollBar.setOrientation(JScrollBar.HORIZONTAL);
         plotScrollBar.setName("timeScroll");
         mainPanel.add(plotScrollBar);
         plotScrollBar.setBounds(73, 352, 580, 16);
@@ -351,44 +277,26 @@ public class EcgPlotWindow extends JPanel implements AdjustmentListener {
         mainPanel.add(jTextArea1);
         jTextArea1.setBounds(5, 120, 10, 130);
 
-        TableScrollPane.setBorder(new javax.swing.border.TitledBorder(null, "Data Table", javax.swing.border.TitledBorder.CENTER, javax.swing.border.TitledBorder.ABOVE_TOP));
-        TableScrollPane.setHorizontalScrollBarPolicy(javax.swing.JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
-        TableScrollPane.setVerticalScrollBarPolicy(javax.swing.JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+        tableScrollPane.setBorder(new TitledBorder(null, "Data Table", javax.swing.border.TitledBorder.CENTER, javax.swing.border.TitledBorder.ABOVE_TOP));
+        tableScrollPane.setHorizontalScrollBarPolicy(javax.swing.JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
+        tableScrollPane.setVerticalScrollBarPolicy(javax.swing.JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         tableValues.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_OFF);
-        TableScrollPane.setViewportView(tableValues);
+        tableScrollPane.setViewportView(tableValues);
 
-        mainPanel.add(TableScrollPane);
-        TableScrollPane.setBounds(660, 0, 180, 340);
+        mainPanel.add(tableScrollPane);
+        tableScrollPane.setBounds(660, 0, 180, 340);
 
-        closeButton.setText("Close");
-        closeButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                closeButtonActionPerformed(evt);
-            }
-        });
-
-        mainPanel.add(closeButton);
-        closeButton.setBounds(750, 380, 80, 25);
-
-        exportButton.setIcon(new javax.swing.ImageIcon("res/img/disk.gif"));
+        exportButton.setIcon(new ImageIcon("res/img/disk.gif"));
         exportButton.setText("Export Data...");
         exportButton.setToolTipText("Export Table Data to a File");
         exportButton.setIconTextGap(15);
-        exportButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                exportButtonActionPerformed(evt);
-            }
-        });
+        exportButton.addActionListener(EcgPlotWindow.this::exportButtonActionPerformed);
 
         mainPanel.add(exportButton);
         exportButton.setBounds(660, 343, 180, 25);
 
         clearButton.setText("Clear");
-        clearButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                clearButtonActionPerformed(evt);
-            }
-        });
+        clearButton.addActionListener(EcgPlotWindow.this::clearButtonActionPerformed);
 
         mainPanel.add(clearButton);
         clearButton.setBounds(630, 380, 80, 25);
@@ -410,14 +318,13 @@ public class EcgPlotWindow extends JPanel implements AdjustmentListener {
 
     private void exportButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exportButtonActionPerformed
         EcgExportWindow exportWin = new EcgExportWindow(null, true, paramOb, calcOb, ecgLog);
-        exportWin.show();
+        exportWin.setVisible(true);
     }//GEN-LAST:event_exportButtonActionPerformed
     // End of variables declaration//GEN-END:variables
 
     private void animateStopButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_animateStopButtonActionPerformed
         /* Stop the Animate Plotting Task */
         ecgAnimateTimer.cancel();
-        ecgAnimateFlg = false;
         /* Enable automatic plot */
         readyToPlot = true;
         /* Repaint Plot Area */
@@ -435,12 +342,11 @@ public class EcgPlotWindow extends JPanel implements AdjustmentListener {
         /*
          * Initialize ECG Animate variables
          */
-        ecgAnimateFlg = true;
         ecgAnimateNumRows = tableValuesModel.getRowCount();
         ecgAnimateCurRow = 0;
         ecgAnimatePanelWidth = ecgFrame.getBounds().width;
         ecgAnimateInitialZero = 0;
-        ecgAnimateLastPoint.setLocation(0, posOriginY - (int) (Double.valueOf(tableValues.getValueAt(0, 1).toString()).doubleValue() * frameAmplitude / paramOb.getAmplitude()));
+        ecgAnimateLastPoint.setLocation(0, posOriginY - (int) (Double.valueOf(tableValues.getValueAt(0, 1).toString()) * frameAmplitude / paramOb.getAmplitude()));
 
         /* Create Timer */
         ecgAnimateTimer = new Timer();
@@ -468,10 +374,6 @@ public class EcgPlotWindow extends JPanel implements AdjustmentListener {
 
         this.setCursor(java.awt.Cursor.getPredefinedCursor(java.awt.Cursor.DEFAULT_CURSOR));
     }//GEN-LAST:event_zoomOutButtonActionPerformed
-
-    private void closeButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_closeButtonActionPerformed
-        //this.setVisible(false);
-    }//GEN-LAST:event_closeButtonActionPerformed
 
     private void generateButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_generateButtonActionPerformed
         this.setCursor(java.awt.Cursor.getPredefinedCursor(java.awt.Cursor.WAIT_CURSOR));
@@ -531,7 +433,6 @@ public class EcgPlotWindow extends JPanel implements AdjustmentListener {
             if (rows > 0) {
                 //JOptionPane.showMessageDialog(this, "Entro a: rows > 0");
                 readyToPlot = true;
-                ecgGenerated = true;
                 enableButtons();
             } else {
                 ecgLog.println("No data to plot!.");
@@ -548,8 +449,6 @@ public class EcgPlotWindow extends JPanel implements AdjustmentListener {
     }//GEN-LAST:event_generateButtonActionPerformed
 
     private void resetECG() {
-        ecgGenerated = false;
-        //clearParameters();
         resetPlotArea();
         resetButtons();
     }
@@ -617,11 +516,11 @@ public class EcgPlotWindow extends JPanel implements AdjustmentListener {
     private void fillDataTable() {
         // Delete the DataTable
         for (int i = 0; i < calcOb.getEcgResultNumRows(); i++) {
-            Vector nuevoRow = new Vector(3);
-            nuevoRow.addElement(new String(Double.toString(calcOb.getEcgResultTime(i))));
-            nuevoRow.addElement(new String(Double.toString(calcOb.getEcgResultVoltage(i))));
-            nuevoRow.addElement(new String(Integer.toString(calcOb.getEcgResultPeak(i))));
-            tableValuesModel.addRow(nuevoRow);
+            Vector<String> newRow = new Vector<>(3);
+            newRow.addElement(Double.toString(calcOb.getEcgResultTime(i)));
+            newRow.addElement(Double.toString(calcOb.getEcgResultVoltage(i)));
+            newRow.addElement(Integer.toString(calcOb.getEcgResultPeak(i)));
+            tableValuesModel.addRow(newRow);
         }
     }
 
@@ -701,7 +600,7 @@ public class EcgPlotWindow extends JPanel implements AdjustmentListener {
         ecgFrame.repaint();
     }
 
-    class ecgPanel extends javax.swing.JPanel {
+    private class ecgPanel extends javax.swing.JPanel {
 
         public void paintComponent(Graphics g) {
             // First call the paintComponent of the
@@ -712,7 +611,7 @@ public class EcgPlotWindow extends JPanel implements AdjustmentListener {
             g.setColor(frameLineColor);
             g.drawLine(0, posFrameY, ecgFrame.getBounds().width, posFrameY);
             g.drawLine(0, posOriginY, this.getBounds().width, posOriginY);
-            g.drawLine(0, horzScaleY, this.getBounds().width, horzScaleY);
+            g.drawLine(0, horizontalScaleY, this.getBounds().width, horizontalScaleY);
 
             if (readyToPlot) {
                 //JOptionPane.showMessageDialog(EcgPlotWindow.this, "Entro en la funcion paint");
@@ -726,10 +625,10 @@ public class EcgPlotWindow extends JPanel implements AdjustmentListener {
                 /*
                  * Set the first point to the current Table row
                  */
-                initialZero = (int) (Double.valueOf(tableValues.getValueAt(plotScrollBarValue, 0).toString()).doubleValue() / plotZoom);
+                initialZero = (int) (Double.valueOf(tableValues.getValueAt(plotScrollBarValue, 0).toString()) / plotZoom);
                 lastSecond = (int) (Double.valueOf(tableValues.getValueAt(plotScrollBarValue, 0).toString()).doubleValue());
                 x = 0;
-                y = posOriginY - (int) (Double.valueOf(tableValues.getValueAt(plotScrollBarValue, 1).toString()).doubleValue() * frameAmplitude / paramOb.getAmplitude());
+                y = posOriginY - (int) (Double.valueOf(tableValues.getValueAt(plotScrollBarValue, 1).toString()) * frameAmplitude / paramOb.getAmplitude());
                 Point lastPoint = new java.awt.Point(x, y);
                 i = plotScrollBarValue;
 
@@ -739,16 +638,16 @@ public class EcgPlotWindow extends JPanel implements AdjustmentListener {
                     if (curSecond > lastSecond) {
                         lastSecond = curSecond;
                         // Convert the x value to a string
-                        strValue = EcgFormatNumber.toString(Double.valueOf(tableValues.getValueAt(i, 0).toString()).doubleValue(), upLimit, loLimit, 2);
+                        strValue = EcgFormatNumber.toString(Double.valueOf(tableValues.getValueAt(i, 0).toString()), upLimit, loLimit, 2);
                         /*
                          * Plot the X axes number values (the Time).
                          */
                         g.setColor(axesNumColor);
                         drawText(g, strValue,
-                                x, horzScaleY, horzScaleWidth, horzScaleHeight,
+                                x, horizontalScaleY, horizontalScaleWidth, horizontalScaleHeight,
                                 fScaleNumSize, LEFT);
                         g.setColor(frameInsideLineColor);
-                        g.drawLine(x, posFrameY, x, horzScaleY + 5);
+                        g.drawLine(x, posFrameY, x, horizontalScaleY + 5);
                     }
 
                     /*
@@ -764,8 +663,8 @@ public class EcgPlotWindow extends JPanel implements AdjustmentListener {
                      */
                     lastPoint.setLocation(x, y);
                     i += 1;
-                    x = (int) (Double.valueOf(tableValues.getValueAt(i, 0).toString()).doubleValue() / plotZoom) - initialZero;
-                    y = posOriginY - (int) (Double.valueOf(tableValues.getValueAt(i, 1).toString()).doubleValue() * frameAmplitude / paramOb.getAmplitude());
+                    x = (int) (Double.valueOf(tableValues.getValueAt(i, 0).toString()) / plotZoom) - initialZero;
+                    y = posOriginY - (int) (Double.valueOf(tableValues.getValueAt(i, 1).toString()) * frameAmplitude / paramOb.getAmplitude());
                 }
             }
         }
@@ -777,10 +676,10 @@ public class EcgPlotWindow extends JPanel implements AdjustmentListener {
     class ECGAnimate extends TimerTask {
 
         int x = 0;
-        int y = posOriginY - (int) (Double.valueOf(tableValues.getValueAt(ecgAnimateCurRow, 1).toString()).doubleValue() * frameAmplitude / paramOb.getAmplitude());
+        int y = posOriginY - (int) (Double.valueOf(tableValues.getValueAt(ecgAnimateCurRow, 1).toString()) * frameAmplitude / paramOb.getAmplitude());
         int curSecond = 0;
         int lastSecond = 0;
-        Graphics ga = ecgFrame.getGraphics();
+        final Graphics ga = ecgFrame.getGraphics();
 
         public void run() {
             curSecond = (int) (Double.valueOf(tableValues.getValueAt(ecgAnimateCurRow, 0).toString()).doubleValue());
@@ -790,12 +689,12 @@ public class EcgPlotWindow extends JPanel implements AdjustmentListener {
                  * Plot the X axes number values (the Time).
                  */
                 ga.setColor(axesNumColor);
-                drawText(ga, EcgFormatNumber.toString(Double.valueOf(tableValues.getValueAt(ecgAnimateCurRow, 0).toString()).doubleValue(), upLimit, loLimit, 2),
-                        x, horzScaleY, horzScaleWidth, horzScaleHeight,
+                drawText(ga, EcgFormatNumber.toString(Double.valueOf(tableValues.getValueAt(ecgAnimateCurRow, 0).toString()), upLimit, loLimit, 2),
+                        x, horizontalScaleY, horizontalScaleWidth, horizontalScaleHeight,
                         fScaleNumSize, LEFT);
 
                 ga.setColor(frameInsideLineColor);
-                ga.drawLine(x, posFrameY, x, horzScaleY + 5);
+                ga.drawLine(x, posFrameY, x, horizontalScaleY + 5);
 
             }
 
@@ -811,7 +710,7 @@ public class EcgPlotWindow extends JPanel implements AdjustmentListener {
                 ecgAnimateCurRow = 0;
                 ecgAnimateInitialZero = 0;
                 x = 0;
-                y = posOriginY - (int) (Double.valueOf(tableValues.getValueAt(ecgAnimateCurRow, 1).toString()).doubleValue() * frameAmplitude / paramOb.getAmplitude());
+                y = posOriginY - (int) (Double.valueOf(tableValues.getValueAt(ecgAnimateCurRow, 1).toString()) * frameAmplitude / paramOb.getAmplitude());
                 ecgAnimateLastPoint.setLocation(x, y);
                 curSecond = 0;
                 lastSecond = 0;
@@ -823,15 +722,15 @@ public class EcgPlotWindow extends JPanel implements AdjustmentListener {
                  */
                 ecgFrame.repaint();
                 x = 0;
-                y = posOriginY - (int) (Double.valueOf(tableValues.getValueAt(ecgAnimateCurRow, 1).toString()).doubleValue() * frameAmplitude / paramOb.getAmplitude());
-                ecgAnimateInitialZero = (int) (Double.valueOf(tableValues.getValueAt(ecgAnimateCurRow, 0).toString()).doubleValue() / plotZoom);
+                y = posOriginY - (int) (Double.valueOf(tableValues.getValueAt(ecgAnimateCurRow, 1).toString()) * frameAmplitude / paramOb.getAmplitude());
+                ecgAnimateInitialZero = (int) (Double.valueOf(tableValues.getValueAt(ecgAnimateCurRow, 0).toString()) / plotZoom);
                 ecgAnimateLastPoint.setLocation(x, y);
                 //curSecond  = 0;
                 //lastSecond = 0;
             } else {
                 ecgAnimateLastPoint.setLocation(x, y);
-                x = (int) (Double.valueOf(tableValues.getValueAt(ecgAnimateCurRow, 0).toString()).doubleValue() / plotZoom) - ecgAnimateInitialZero;
-                y = posOriginY - (int) (Double.valueOf(tableValues.getValueAt(ecgAnimateCurRow, 1).toString()).doubleValue() * frameAmplitude / paramOb.getAmplitude());
+                x = (int) (Double.valueOf(tableValues.getValueAt(ecgAnimateCurRow, 0).toString()) / plotZoom) - ecgAnimateInitialZero;
+                y = posOriginY - (int) (Double.valueOf(tableValues.getValueAt(ecgAnimateCurRow, 1).toString()) * frameAmplitude / paramOb.getAmplitude());
             }
         }
     }

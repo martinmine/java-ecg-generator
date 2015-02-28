@@ -9,40 +9,92 @@ package og.acm.ecg;/*
  *         Part of of this code was taken from the ECG C version
  * @Copyright Patrick McSharry and Gari Clifford.
  */
-
 public class EcgParam {
 
     /**
-     * *************************************************************
-     * GLOBAL ECG PARAMETERS:
-     * **************************************************************
+     * Number of heart beats
      */
-    private int N;               /*  Number of heart beats              */
-    private double hrstd;           /*  Heart rate std                     */
-    private double hrmean;          /*  Heart rate mean                    */
-    private double lfhfratio;       /*  LF/HF ratio                        */
-    private int sfecg;           /*  ECG sampling frequency             */
-    private int sf;              /*  Internal sampling frequency        */
-    private double amplitude;       /*  Amplitude for the plot area        */
-    private int seed;               /*  Seed                               */
-    private double anoise;          /*  Amplitude of additive uniform noise*/
+    private int N;
+
+    /**
+     * Heart rate std
+     */
+    private double hrstd;
+
+    /**
+     * Heart rate mean
+     */
+    private double hrmean;
+
+    /**
+     * LF/HF ratio
+     */
+    private double lfhfratio;
+
+    /**
+     * ECG sampling frequency
+     */
+    private int sfecg;
+
+    /**
+     * Internal sampling frequency
+     */
+    private int sf;
+
+    /**
+     * Amplitude for the plot area
+     */
+    private double amplitude;
+
+    /**
+     * Random seed
+     */
+    private int seed;
+
+    /**
+     * Amplitude of additive uniform noise
+     */
+    private double anoise;
     private int period;
-    /* Define frequency parameters for rr process 
-     * flo and fhi correspond to the Mayer waves and respiratory rate respectively
+
+    /**
+     * Define frequency parameters for rr process flo and fhi correspond to
+     * the Mayer waves and respiratory rate respectively
      */
-    private double flo;             /*  Low frequency                      */
-    private double fhi;             /*  High frequency                     */
-    private double flostd;          /*  Low frequency std                  */
-    private double fhistd;          /*  High frequency std                 */
+
+    /**
+     * Low frequency
+     */
+    private double flo;
+
+    /**
+     * High frequency
+     */
+    private double fhi;
+
+    /**
+     * Low frequency std
+     */
+    private double flostd;
+
+    /**
+     * High frequency std
+     */
+    private double fhistd;
+
     /* Order of extrema: [P Q R S T]  */
     private double[] theta = new double[5]; /* ti not in radians*/
     private double[] a = new double[5];
     private double[] b = new double[5];
 
-    /* Animation variables */
+    /**
+     * Animation variables
+     */
     private long ecgAnimateInterval;
 
-    /* Flag to know if all parameters are valid */
+    /**
+     * Flag to know if all parameters are valid
+     */
     private boolean allParametersValid;
 
     /**
@@ -56,11 +108,6 @@ public class EcgParam {
         return N;
     }
 
-    /**
-     * *************************************************************
-     * GLOBAL Set/Get Parameter Functions:
-     * **************************************************************
-     */
     public void setN(int value) {
         N = value;
         allParametersValid = false;
@@ -211,51 +258,51 @@ public class EcgParam {
         return b[index];
     }
 
+    /**
+     * @return The ECG animation interval in milliseconds.
+     */
     public long getEcgAnimateInterval() {
         return ecgAnimateInterval;
     }
 
+    /**
+     * Sets the ECG animation level interval.
+     * @param value Animation interval in milliseconds.
+     */
     public void setEcgAnimateInterval(long value) {
         ecgAnimateInterval = value;
         allParametersValid = false;
     }
 
     /**
-     * *************************************************************
-     * Functions:
-     * **************************************************************
-     */
-
-    /*
-     * check to see if all parameters are valid
+     * @return Indicates whether all parameters are valid.
      */
     public boolean isValid() {
         return allParametersValid;
     }
 
-    /*
-     * In this function, it can be enforced
-     * adicional rules.
+    /**
+     * In this function, it can be enforced additional rules.
      */
     public boolean checkParameters() {
 
-        boolean RetValue = true;
+        boolean returnValue = true;
         allParametersValid = true;
 
         // Check the Internal frequency respect to ECG frequency
         if (((int) Math.IEEEremainder(sf, sfecg)) != 0) {
-            RetValue = false;
+            returnValue = false;
             allParametersValid = false;
         }
 
-        return RetValue;
+        return returnValue;
     }
 
-    /*
-     * ReInit the Button Parameters' values
+    /**
+     * Re-initializes the button parameter values
      */
     public void resetParameters() {
-        /* General Intergace parameters */
+        /* General Interface parameters */
         N = 256;
         sfecg = 256;
         sf = 512;

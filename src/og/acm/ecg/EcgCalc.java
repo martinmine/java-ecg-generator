@@ -9,23 +9,23 @@ package og.acm.ecg;
 
 public class EcgCalc {
 
-    /* C defines */
-    private final double PI = 2.0 * Math.asin(1.0);
-    private final int IA = 16807;
-    private final long IM = 2147483647;
-    private final double AM = (1.0 / IM);
-    private final long IQ = 127773;
-    private final int IR = 2836;
-    private final int NTAB = 32;
-    private final double NDIV = (1 + (IM - 1) / NTAB);
-    private final double EPS = 1.2e-7;
-    private final double RNMX = (1.0 - EPS);
     /**
-     * **************************************************************************
-     * DEFINE PARAMETERS AS GLOBAL VARIABLES                                 *
-     * ***************************************************************************
+     * Constants
      */
-    //private String outfile ="ecgsyn.dat";
+    private static final double PI = 2.0 * Math.asin(1.0);
+    private static final int IA = 16807;
+    private static final long IM = 2147483647;
+    private static final double AM = (1.0 / IM);
+    private static final long IQ = 127773;
+    private static final int IR = 2836;
+    private static final int NTAB = 32;
+    private static final double NDIV = (1 + (IM - 1) / NTAB);
+    private static final double EPS = 1.2e-7;
+    private static final double RNMX = (1.0 - EPS);
+
+    /**
+     * DEFINE PARAMETERS AS GLOBAL VARIABLES
+     */
     // Order of extrema: [P Q R S T]
     private double[] ti = new double[6];  /* ti converted in radians             */
     private double[] ai = new double[6];  /* new calculated a                    */
@@ -37,11 +37,13 @@ public class EcgCalc {
     private long rseed;
     private double h;
     private double[] rr, rrpc;
+
     /*
      * Variables for static function ran1()
      */
     private long iy;
     private long[] iv;
+
     /*
      * ECG Result Variables
      */
