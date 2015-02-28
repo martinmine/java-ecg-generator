@@ -21,7 +21,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.Vector;
 
-public class PlotPanel extends JPanel implements AdjustmentListener {
+public class GraphPanel extends JPanel implements AdjustmentListener {
 
     /**
      * These constants used in drawText() method for placement 
@@ -98,12 +98,12 @@ public class PlotPanel extends JPanel implements AdjustmentListener {
     private final EcgCalc calcOb;
     private final EcgParameters paramOb;
     private final LogWindow ecgLog;
-    private javax.swing.table.DefaultTableModel tableValuesModel;
-    private ecgPanel ecgFrame;
+    private DefaultTableModel tableValuesModel;
+    private ECGPanel ecgFrame;
     /**
      * Creates new form plotWindow
      */
-    public PlotPanel(EcgParameters parameters, LogWindow logOb) {
+    public GraphPanel(EcgParameters parameters, LogWindow logOb) {
         this.paramOb = parameters;
         this.calcOb = new EcgCalc(paramOb, logOb);
         this.ecgLog = logOb;
@@ -118,20 +118,11 @@ public class PlotPanel extends JPanel implements AdjustmentListener {
         /**
          * Init the data Table
          */
-        tableValuesModel = new DefaultTableModel(new Object[][]{},
-                new String[]{"Time", "Voltage", "Peak"}) {
-            final Class[] types = new Class[]{
-                    String.class, String.class, String.class
-            };
-
-            public Class getColumnClass(int columnIndex) {
-                return types[columnIndex];
-            }
-        };
+        tableValuesModel = new EcgCalculationsTableModelAdapter(this.calcOb);
         tableValues.setModel(tableValuesModel);
 
         /* Init the ecgFrame */
-        ecgFrame = new ecgPanel();
+        ecgFrame = new ECGPanel();
         ecgFrame.setBackground(new java.awt.Color(255, 255, 255));
         ecgPlotArea.setViewportView(ecgFrame);
 
@@ -290,13 +281,13 @@ public class PlotPanel extends JPanel implements AdjustmentListener {
         exportButton.setText("Export Data...");
         exportButton.setToolTipText("Export Table Data to a File");
         exportButton.setIconTextGap(15);
-        exportButton.addActionListener(PlotPanel.this::exportButtonActionPerformed);
+        exportButton.addActionListener(GraphPanel.this::exportButtonActionPerformed);
 
         mainPanel.add(exportButton);
         exportButton.setBounds(660, 343, 180, 25);
 
         clearButton.setText("Clear");
-        clearButton.addActionListener(PlotPanel.this::clearButtonActionPerformed);
+        clearButton.addActionListener(GraphPanel.this::clearButtonActionPerformed);
 
         mainPanel.add(clearButton);
         clearButton.setBounds(630, 380, 80, 25);
@@ -413,8 +404,7 @@ public class PlotPanel extends JPanel implements AdjustmentListener {
          * Call the ECG funtion to calculate the data into the Data Table.
          */
         if (calcOb.calculateEcg()) {
-
-            fillDataTable();
+            this.tableValuesModel.fireTableDataChanged();
             ecgLog.println("Starting to plot ECG table data....");
 
             /*
@@ -513,7 +503,7 @@ public class PlotPanel extends JPanel implements AdjustmentListener {
         animateStopButton.setEnabled(false);
     }
 
-    private void fillDataTable() {
+    /*private void fillDataTable() {
         // Delete the DataTable
         for (int i = 0; i < calcOb.getEcgResultNumRows(); i++) {
             Vector<String> newRow = new Vector<>(3);
@@ -522,7 +512,7 @@ public class PlotPanel extends JPanel implements AdjustmentListener {
             newRow.addElement(Integer.toString(calcOb.getEcgResultPeak(i)));
             tableValuesModel.addRow(newRow);
         }
-    }
+    }*/
 
     /**
      * Draw a string in the center of a given box.
@@ -600,7 +590,7 @@ public class PlotPanel extends JPanel implements AdjustmentListener {
         ecgFrame.repaint();
     }
 
-    private class ecgPanel extends javax.swing.JPanel {
+    private class ECGPanel extends JPanel {
 
         public void paintComponent(Graphics g) {
             // First call the paintComponent of the
@@ -614,7 +604,6 @@ public class PlotPanel extends JPanel implements AdjustmentListener {
             g.drawLine(0, horizontalScaleY, this.getBounds().width, horizontalScaleY);
 
             if (readyToPlot) {
-                //JOptionPane.showMessageDialog(EcgPlotWindow.this, "Entro en la funcion paint");
                 int rows = tableValuesModel.getRowCount();
                 int x, y, i;
                 int plotLimit;
@@ -633,7 +622,6 @@ public class PlotPanel extends JPanel implements AdjustmentListener {
                 i = plotScrollBarValue;
 
                 while ((x <= this.getBounds().width) && (i <= rows)) {
-                    //JOptionPane.showMessageDialog(EcgPlotWindow.this, "Entro al while de paint");
                     curSecond = (int) (Double.valueOf(tableValues.getValueAt(i, 0).toString()).doubleValue());
                     if (curSecond > lastSecond) {
                         lastSecond = curSecond;
@@ -670,32 +658,32 @@ public class PlotPanel extends JPanel implements AdjustmentListener {
         }
     }
 
+
     /*
      * Class to plot the ECG animation
      */
     class ECGAnimate extends TimerTask {
-
-        int x = 0;
-        int y = posOriginY - (int) (Double.valueOf(tableValues.getValueAt(ecgAnimateCurRow, 1).toString()) * frameAmplitude / paramOb.getAmplitude());
-        int curSecond = 0;
-        int lastSecond = 0;
-        final Graphics ga = ecgFrame.getGraphics();
+        private int x = 0;
+        private int y = posOriginY - (int) (Double.valueOf(tableValues.getValueAt(ecgAnimateCurRow, 1).toString()) * frameAmplitude / paramOb.getAmplitude());
+        private int curSecond = 0;
+        private double lastSecond = 0;
+        private final Graphics ga = ecgFrame.getGraphics();
 
         public void run() {
-            curSecond = (int) (Double.valueOf(tableValues.getValueAt(ecgAnimateCurRow, 0).toString()).doubleValue());
+            curSecond = (int)calcOb.getEcgResultTime(ecgAnimateCurRow);
+
             if (curSecond > lastSecond) {
                 lastSecond = curSecond;
                 /*
                  * Plot the X axes number values (the Time).
                  */
                 ga.setColor(axesNumColor);
-                drawText(ga, NumberFormatter.toString(Double.valueOf(tableValues.getValueAt(ecgAnimateCurRow, 0).toString()), upLimit, loLimit, 2),
+                drawText(ga, NumberFormatter.toString(calcOb.getEcgResultTime(ecgAnimateCurRow), upLimit, loLimit, 2),
                         x, horizontalScaleY, horizontalScaleWidth, horizontalScaleHeight,
                         fScaleNumSize, LEFT);
 
                 ga.setColor(frameInsideLineColor);
                 ga.drawLine(x, posFrameY, x, horizontalScaleY + 5);
-
             }
 
             ga.setColor(ecgPlotColor);
@@ -710,7 +698,7 @@ public class PlotPanel extends JPanel implements AdjustmentListener {
                 ecgAnimateCurRow = 0;
                 ecgAnimateInitialZero = 0;
                 x = 0;
-                y = posOriginY - (int) (Double.valueOf(tableValues.getValueAt(ecgAnimateCurRow, 1).toString()) * frameAmplitude / paramOb.getAmplitude());
+                y = posOriginY - (int) (calcOb.getEcgResultVoltage(ecgAnimateCurRow) * frameAmplitude / paramOb.getAmplitude());
                 ecgAnimateLastPoint.setLocation(x, y);
                 curSecond = 0;
                 lastSecond = 0;
@@ -722,15 +710,15 @@ public class PlotPanel extends JPanel implements AdjustmentListener {
                  */
                 ecgFrame.repaint();
                 x = 0;
-                y = posOriginY - (int) (Double.valueOf(tableValues.getValueAt(ecgAnimateCurRow, 1).toString()) * frameAmplitude / paramOb.getAmplitude());
-                ecgAnimateInitialZero = (int) (Double.valueOf(tableValues.getValueAt(ecgAnimateCurRow, 0).toString()) / plotZoom);
+                y = posOriginY - (int) (calcOb.getEcgResultVoltage(ecgAnimateCurRow) * frameAmplitude / paramOb.getAmplitude());
+                ecgAnimateInitialZero = (int) (calcOb.getEcgResultTime(ecgAnimateCurRow) / plotZoom);
                 ecgAnimateLastPoint.setLocation(x, y);
                 //curSecond  = 0;
                 //lastSecond = 0;
             } else {
                 ecgAnimateLastPoint.setLocation(x, y);
-                x = (int) (Double.valueOf(tableValues.getValueAt(ecgAnimateCurRow, 0).toString()) / plotZoom) - ecgAnimateInitialZero;
-                y = posOriginY - (int) (Double.valueOf(tableValues.getValueAt(ecgAnimateCurRow, 1).toString()) * frameAmplitude / paramOb.getAmplitude());
+                x = (int) (calcOb.getEcgResultTime(ecgAnimateCurRow) / plotZoom) - ecgAnimateInitialZero;
+                y = posOriginY - (int) (calcOb.getEcgResultVoltage(ecgAnimateCurRow) * frameAmplitude / paramOb.getAmplitude());
             }
         }
     }

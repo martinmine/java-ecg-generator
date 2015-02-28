@@ -16,7 +16,7 @@ import java.awt.event.*;
 
 public class MainApplication extends javax.swing.JFrame {
     /* Main GUI-Window Objects*/
-    private PlotPanel plotWin;
+    private GraphPanel plotWin;
     private ParameterWindow paramWin;
     private LogWindow logWin;
 
@@ -55,7 +55,7 @@ public class MainApplication extends javax.swing.JFrame {
 
         this.logWin = new LogWindow();
         this.paramWin = new ParameterWindow(paramOb, logWin);
-        this.plotWin = new PlotPanel(paramOb, logWin);
+        this.plotWin = new GraphPanel(paramOb, logWin);
     }
 
     private void initWindow() {
