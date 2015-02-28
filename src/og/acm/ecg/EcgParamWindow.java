@@ -14,7 +14,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
-public class EcgParamWindow extends JInternalFrame {
+public class EcgParamWindow extends JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JScrollPane ExtremaLabelScrollPane;
@@ -182,9 +182,7 @@ public class EcgParamWindow extends JInternalFrame {
         saveButton = new javax.swing.JButton();
         applyButton = new javax.swing.JButton();
 
-        setClosable(true);
         setDefaultCloseOperation(javax.swing.WindowConstants.HIDE_ON_CLOSE);
-        setIconifiable(true);
         setResizable(true);
         setTitle("Set parameters for ECG");
         jPanel2.setLayout(null);

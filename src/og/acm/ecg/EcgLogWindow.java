@@ -12,6 +12,7 @@ package og.acm.ecg;/*
 import javax.swing.*;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.TitledBorder;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.FileWriter;
@@ -19,7 +20,7 @@ import java.io.IOException;
 import java.text.DateFormat;
 import java.util.Date;
 
-public class EcgLogWindow extends javax.swing.JInternalFrame {
+public class EcgLogWindow extends JFrame {
 
     private DateFormat shorTime = DateFormat.getTimeInstance();
     private DateFormat longDateTime = DateFormat.getDateTimeInstance();
@@ -81,13 +82,8 @@ public class EcgLogWindow extends javax.swing.JInternalFrame {
         closeButton = new JButton();
         saveButton = new JButton();
 
-        setClosable(true);
-        setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
-        setIconifiable(true);
-        setMaximizable(true);
-        setResizable(true);
-        setTitle("ECG System Log");
-        jPanel1.setLayout(null);
+        setLayout(new BorderLayout());
+        jPanel1.setLayout(new BorderLayout());
 
         statusScrollPane.setBorder(new TitledBorder(new BevelBorder(BevelBorder.RAISED), "Status and Messages:", TitledBorder.LEFT, TitledBorder.ABOVE_TOP));
         statusScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
@@ -129,9 +125,7 @@ public class EcgLogWindow extends javax.swing.JInternalFrame {
         jPanel1.add(saveButton);
         saveButton.setBounds(420, 400, 100, 25);
 
-        getContentPane().add(jPanel1, java.awt.BorderLayout.CENTER);
-
-        pack();
+        add(jPanel1, java.awt.BorderLayout.CENTER);
     }
 
     private void saveButtonActionPerformed(ActionEvent evt) {

@@ -18,7 +18,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.Vector;
 
-public class EcgPlotWindow extends JInternalFrame implements AdjustmentListener {
+public class EcgPlotWindow extends JPanel implements AdjustmentListener {
 
     /**
      * ******************************************
@@ -222,11 +222,7 @@ public class EcgPlotWindow extends JInternalFrame implements AdjustmentListener 
         exportButton = new javax.swing.JButton();
         clearButton = new javax.swing.JButton();
 
-        setClosable(true);
-        setIconifiable(true);
-        setMaximizable(true);
-        setResizable(true);
-        setTitle("Plot ECG");
+        setLayout(new BorderLayout());
         plotToolBar.setBorder(new javax.swing.border.EtchedBorder(null, java.awt.Color.lightGray));
         plotToolBar.setRollover(true);
         plotToolBar.setMinimumSize(new java.awt.Dimension(234, 30));
@@ -318,7 +314,7 @@ public class EcgPlotWindow extends JInternalFrame implements AdjustmentListener 
 
         plotToolBar.add(jSeparator1);
 
-        getContentPane().add(plotToolBar, java.awt.BorderLayout.NORTH);
+        add(plotToolBar, java.awt.BorderLayout.NORTH);
 
         mainPanel.setLayout(null);
 
@@ -397,9 +393,8 @@ public class EcgPlotWindow extends JInternalFrame implements AdjustmentListener 
         mainPanel.add(clearButton);
         clearButton.setBounds(630, 380, 80, 25);
 
-        getContentPane().add(mainPanel, java.awt.BorderLayout.CENTER);
+        add(mainPanel, java.awt.BorderLayout.CENTER);
 
-        pack();
     }//GEN-END:initComponents
 
     private void clearButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clearButtonActionPerformed
@@ -476,7 +471,6 @@ public class EcgPlotWindow extends JInternalFrame implements AdjustmentListener 
 
     private void closeButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_closeButtonActionPerformed
         //this.setVisible(false);
-        this.dispose();
     }//GEN-LAST:event_closeButtonActionPerformed
 
     private void generateButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_generateButtonActionPerformed
