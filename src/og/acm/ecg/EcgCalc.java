@@ -84,11 +84,16 @@ public class EcgCalc {
     }
 
     public double getEcgResultTime(int index) {
-        return ecgResultTime[index];
+        if (index < ecgResultTime.length)
+            return ecgResultTime[index];
+        else return 0;
     }
 
     public double getEcgResultVoltage(int index) {
-        return ecgResultVoltage[index];
+        if (index < ecgResultVoltage.length)
+            return ecgResultVoltage[index];
+        else
+            return 0;
     }
 
     public int getEcgResultPeak(int index) {
@@ -487,7 +492,7 @@ public class EcgCalc {
         int q;
         double tstep, tecg, rrmean, hrfact, hrfact2;
         double[] xt, yt, zt, zts;
-        double timev, zmin, zmax, zrange;
+        double timev; //, zmin, zmax, zrange;
 
         // perform some checks on input values
         q = (int) Math.rint(paramOb.getSf() / paramOb.getSfEcg());
@@ -586,54 +591,39 @@ public class EcgCalc {
         }
         Nt = j;
 
+        this.ecgResultNumRows = (int) Math.ceil( (double) Nt / q);
+        this.ecgResultVoltage = new double[ecgResultNumRows];
+        this.ecgResultTime = new double[ecgResultNumRows];
+
         /* integrate dynamical system using fourth order Runge-Kutta*/
         zt = new double[Nt + 1];
         timev = 0.0;
 
-        // "core"
-        for (i = 1; i <= Nt; i++) {
-            zt[i] = x[3];
-            Rk4(x, mstate, timev, h, x);
-            timev += h;
-        }
 
-        /* downsample to ECG sampling frequency */
-        zts = new double[Nt + 1];
-
-        for (i = 1, j = 1; i <= Nt; i += q, j++) {
-            zts[j] = zt[i];
-        }
-
-        this.ecgResultNumRows = (int) Math.ceil( (double) Nt / q);
-
-        /*
-        * scale signal to lie between -0.4 and 1.2 mV
+       /*
+        * constants for scaling the signal to lie between -0.4 and 1.2 mV
         */
-        zmin = zts[1];
-        zmax = zts[1];
+        final double zMin = -0.01;
+        final double zRange = 0.066;
 
-        for (i = 2; i <= ecgResultNumRows; i++) {
-            if (zts[i] < zmin)
-                zmin = zts[i];
-            else if (zts[i] > zmax)
-                zmax = zts[i];
-        }
-
-        zrange = zmax - zmin;
-
-        this.ecgResultVoltage = new double[ecgResultNumRows];
-        this.ecgResultTime = new double[ecgResultNumRows];
 
         /*
          * insert into the ECG data table
          */
         ecgLog.println("Generating result matrix...");
 
-        for (i = 1; i <= ecgResultNumRows; i++) {
-            /* include additive uniformly distributed measurement noise */
-            final double noise = paramOb.getANoise() * (2.0 * ran1() - 1.0);
-            ecgResultVoltage[i - 1] = ((zts[i] - zmin) * (1.6) / zrange - 0.4) + noise;
-            ecgResultTime[i - 1] = (i - 1) * tstep;
+        for (i = 1, j = 0; i <= Nt; i++) {
+            zt[i] = x[3];
+            Rk4(x, mstate, timev, h, x);
+            timev += h;
+
+            if (i % q == 0) {
+                final double noise = paramOb.getANoise() * (2.0 * ran1() - 1.0);
+                double v = ((x[3] - zMin) * (1.6) / zRange - 0.4) + noise;
+                ecgResultVoltage[j] = v;
+                ecgResultTime[j] = (j) * tstep;
+                j++;
+            }
         }
 
         ecgLog.println("Finished generating result matrix.");
