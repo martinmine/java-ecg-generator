@@ -50,7 +50,6 @@ public class EcgCalc {
     /* Result Vectors*/
     private double[] ecgResultTime;
     private double[] ecgResultVoltage;
-    private int[] ecgResultPeak;
     private int ecgResultNumRows;
     /* Object Variables */
     private EcgParameters paramOb;
@@ -93,7 +92,8 @@ public class EcgCalc {
     }
 
     public int getEcgResultPeak(int index) {
-        return ecgResultPeak[index];
+        // TODO remove this entirely
+        return 0;
     }
 
     /*--------------------------------------------------------------------------*/
@@ -483,18 +483,14 @@ public class EcgCalc {
      * DO RUN PART OF PROGRAM
      */
     private boolean doRun() {
-        int i, j, k, Nrr, Nt, Nts;
+        int i, j, k, Nrr, Nt;
         int q;
-        double[] x;
         double tstep, tecg, rrmean, hrfact, hrfact2;
-        double qd;
-        double[] xt, yt, zt, xts, yts, zts;
+        double[] xt, yt, zt, zts;
         double timev, zmin, zmax, zrange;
-        double[] ipeak;
 
         // perform some checks on input values
         q = (int) Math.rint(paramOb.getSf() / paramOb.getSfEcg());
-        qd = (double) paramOb.getSf() / (double) paramOb.getSfEcg();
 
         /* convert angles from degrees to radians and copy a vector to ai*/
         for (i = 1; i <= 5; i++) {
@@ -517,7 +513,6 @@ public class EcgCalc {
 
         /* declare state vector */
         //x=dvector(1,mstate);
-        x = new double[4];
 
         ecgLog.println("Approximate number of heart beats: " + paramOb.getN());
         ecgLog.println("ECG sampling frequency: " + paramOb.getSfEcg() + " Hertz");
@@ -551,6 +546,8 @@ public class EcgCalc {
         ecgLog.println("S: [" + bi[4] + "\t]");
         ecgLog.println("T: [" + bi[5] + "\t]\n");
 
+
+        double[] x = new double[4];
         /* Initialise the vector */
         x[1] = xinitial;
         x[2] = yinitial;
@@ -590,72 +587,56 @@ public class EcgCalc {
         Nt = j;
 
         /* integrate dynamical system using fourth order Runge-Kutta*/
-        xt = new double[Nt + 1];
-        yt = new double[Nt + 1];
         zt = new double[Nt + 1];
         timev = 0.0;
+
+        // "core"
         for (i = 1; i <= Nt; i++) {
-            xt[i] = x[1];
-            yt[i] = x[2];
             zt[i] = x[3];
             Rk4(x, mstate, timev, h, x);
             timev += h;
         }
 
         /* downsample to ECG sampling frequency */
-        xts = new double[Nt + 1];
-        yts = new double[Nt + 1];
         zts = new double[Nt + 1];
 
-        j = 0;
-        for (i = 1; i <= Nt; i += q) {
-            j++;
-            xts[j] = xt[i];
-            yts[j] = yt[i];
+        for (i = 1, j = 1; i <= Nt; i += q, j++) {
             zts[j] = zt[i];
         }
-        Nts = j;
 
-        /* do peak detection using angle */
-        ipeak = new double[Nts + 1];
-        detectPeaks(ipeak, xts, yts, zts, Nts);
+        this.ecgResultNumRows = (int) Math.ceil( (double) Nt / q);
 
-        /* scale signal to lie between -0.4 and 1.2 mV */
+        /*
+        * scale signal to lie between -0.4 and 1.2 mV
+        */
         zmin = zts[1];
         zmax = zts[1];
-        for (i = 2; i <= Nts; i++) {
+
+        for (i = 2; i <= ecgResultNumRows; i++) {
             if (zts[i] < zmin)
                 zmin = zts[i];
             else if (zts[i] > zmax)
                 zmax = zts[i];
         }
-        zrange = zmax - zmin;
-        for (i = 1; i <= Nts; i++)
-            zts[i] = (zts[i] - zmin) * (1.6) / zrange - 0.4;
 
-        /* include additive uniformly distributed measurement noise */
-        for (i = 1; i <= Nts; i++)
-            zts[i] += paramOb.getANoise() * (2.0 * ran1() - 1.0);
+        zrange = zmax - zmin;
+
+        this.ecgResultVoltage = new double[ecgResultNumRows];
+        this.ecgResultTime = new double[ecgResultNumRows];
 
         /*
          * insert into the ECG data table
          */
         ecgLog.println("Generating result matrix...");
 
-        ecgResultNumRows = Nts;
-
-        ecgResultTime = new double[ecgResultNumRows];
-        ecgResultVoltage = new double[ecgResultNumRows];
-        ecgResultPeak = new int[ecgResultNumRows];
-
-        for (i = 1; i <= Nts; i++) {
+        for (i = 1; i <= ecgResultNumRows; i++) {
+            /* include additive uniformly distributed measurement noise */
+            final double noise = paramOb.getANoise() * (2.0 * ran1() - 1.0);
+            ecgResultVoltage[i - 1] = ((zts[i] - zmin) * (1.6) / zrange - 0.4) + noise;
             ecgResultTime[i - 1] = (i - 1) * tstep;
-            ecgResultVoltage[i - 1] = zts[i];
-            ecgResultPeak[i - 1] = (int) ipeak[i];
         }
 
         ecgLog.println("Finished generating result matrix.");
-
         return true;
     }
 }

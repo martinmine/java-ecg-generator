@@ -727,6 +727,7 @@ public class GraphPanel extends JPanel implements AdjustmentListener {
                 y = posOriginY - (int) (calcOb.getEcgResultVoltage(ecgAnimateCurRow) * frameAmplitude / paramOb.getAmplitude());
             }
 
+            /*
             try {
                 SunGraphics2D graphx = (SunGraphics2D) ga;
                 BufferedRenderPipe pipe = (BufferedRenderPipe) graphx.drawpipe;
@@ -738,7 +739,7 @@ public class GraphPanel extends JPanel implements AdjustmentListener {
 
             } catch (Exception e) {
               e.printStackTrace();
-            }
+            }*/
 
             //pipe.rq.flushNow();
             //ga.drawLine();
