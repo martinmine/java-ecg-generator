@@ -79,6 +79,7 @@ public class MainApplication extends javax.swing.JFrame {
             AboutWindow aboutDialog = new AboutWindow(this, true);
             aboutDialog.setVisible(true);
         });
+        toolPanel.add(aboutBtn);
 
         add(toolPanel, BorderLayout.SOUTH);
         add(plotWin, BorderLayout.CENTER);

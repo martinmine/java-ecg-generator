@@ -9,6 +9,12 @@ package og.acm.ecg;/*
  * @author Mauricio Villarroel (m.villarroel@acm.og)
  */
 
+import sun.java2d.SunGraphics2D;
+import sun.java2d.pipe.BufferedRenderPipe;
+import sun.java2d.pipe.RenderBuffer;
+import sun.java2d.pipe.RenderQueue;
+import sun.security.provider.Sun;
+
 import javax.swing.*;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.EtchedBorder;
@@ -17,6 +23,7 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.AdjustmentEvent;
 import java.awt.event.AdjustmentListener;
+import java.lang.reflect.Field;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.Vector;
@@ -689,7 +696,6 @@ public class GraphPanel extends JPanel implements AdjustmentListener {
             ga.setColor(ecgPlotColor);
             ga.drawLine(ecgAnimateLastPoint.x, ecgAnimateLastPoint.y, x, y);
             ecgAnimateCurRow += 1;
-
             if (ecgAnimateCurRow >= ecgAnimateNumRows) {
                 /*
                  * If we reach the end of the Data Table, loop again entire table.
@@ -720,6 +726,22 @@ public class GraphPanel extends JPanel implements AdjustmentListener {
                 x = (int) (calcOb.getEcgResultTime(ecgAnimateCurRow) / plotZoom) - ecgAnimateInitialZero;
                 y = posOriginY - (int) (calcOb.getEcgResultVoltage(ecgAnimateCurRow) * frameAmplitude / paramOb.getAmplitude());
             }
+
+            try {
+                SunGraphics2D graphx = (SunGraphics2D) ga;
+                BufferedRenderPipe pipe = (BufferedRenderPipe) graphx.drawpipe;
+
+                Field f = pipe.getClass().getSuperclass().getDeclaredField("rq"); //NoSuchFieldException
+                f.setAccessible(true);
+                RenderQueue renderQueue = (RenderQueue) f.get(pipe); //IllegalAccessException
+                renderQueue.flushNow();
+
+            } catch (Exception e) {
+              e.printStackTrace();
+            }
+
+            //pipe.rq.flushNow();
+            //ga.drawLine();
         }
     }
 }
