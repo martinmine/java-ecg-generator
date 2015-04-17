@@ -32,12 +32,7 @@ public class EcgCalculationsTableModelAdapter extends DefaultTableModel {
 
     @Override
     public Object getValueAt(int row, int column) {
-         switch (column) {
-             case 0: return String.valueOf(this.ecgCalc.getEcgResultTime(row));
-             case 1: return String.valueOf(this.ecgCalc.getEcgResultVoltage(row));
-             case 2: return String.valueOf(this.ecgCalc.getEcgResultPeak(row));
-             default: return null;
-         }
+        return null;
     }
 
     @Override

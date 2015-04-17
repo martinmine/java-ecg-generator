@@ -50,7 +50,6 @@ public class EcgCalc {
     /* Result Vectors*/
     private double[] ecgResultTime;
     private double[] ecgResultVoltage;
-    private int[] ecgResultPeak;
     private int ecgResultNumRows;
     /* Object Variables */
     private EcgParameters paramOb;
@@ -70,30 +69,29 @@ public class EcgCalc {
         iv = new long[NTAB];
     }
 
-    public boolean calculateEcg() {
-        boolean RetValue;
-
+    public Generator calculateEcg() {
         ecgLog.println("Starting to calculate ECG....");
-        RetValue = doRun();
-        ecgLog.println("Finished calculating ECG table data.\n");
-
-        return RetValue;
+        return new Generator();
     }
 
     public int getEcgResultNumRows() {
         return ecgResultNumRows;
     }
 
+    @Deprecated
     public double getEcgResultTime(int index) {
         return ecgResultTime[index];
     }
 
+    @Deprecated
     public double getEcgResultVoltage(int index) {
         return ecgResultVoltage[index];
     }
 
+    @Deprecated
     public int getEcgResultPeak(int index) {
-        return ecgResultPeak[index];
+        // TODO remove this entirely
+        return 0;
     }
 
     /*--------------------------------------------------------------------------*/
@@ -380,282 +378,166 @@ public class EcgCalc {
             rr[i] += rrmean;
     }
 
-    /*
-     * DETECT PEAKS
-     */
-    private void detectPeaks(double[] iPeak, double[] x, double[] y, double[] z, int n) {
-        int i, j, j1, j2, jmin, jmax, d;
-        double thetap1, thetap2, thetap3, thetap4, thetap5;
-        double theta1, theta2, d1, d2, zmin, zmax;
-
-        thetap1 = ti[1];
-        thetap2 = ti[2];
-        thetap3 = ti[3];
-        thetap4 = ti[4];
-        thetap5 = ti[5];
-
-        for (i = 1; i <= n; i++)
-            iPeak[i] = 0.0;
-
-        theta1 = Math.atan2(y[1], x[1]);
-
-        for (i = 1; i < n; i++) {
-            theta2 = Math.atan2(y[i + 1], x[i + 1]);
-
-            if ((theta1 <= thetap1) && (thetap1 <= theta2)) {
-                d1 = thetap1 - theta1;
-                d2 = theta2 - thetap1;
-                if (d1 < d2)
-                    iPeak[i] = 1.0;
-                else
-                    iPeak[i + 1] = 1.0;
-            } else if ((theta1 <= thetap2) && (thetap2 <= theta2)) {
-                d1 = thetap2 - theta1;
-                d2 = theta2 - thetap2;
-                if (d1 < d2)
-                    iPeak[i] = 2.0;
-                else
-                    iPeak[i + 1] = 2.0;
-            } else if ((theta1 <= thetap3) && (thetap3 <= theta2)) {
-                d1 = thetap3 - theta1;
-                d2 = theta2 - thetap3;
-                if (d1 < d2)
-                    iPeak[i] = 3.0;
-                else
-                    iPeak[i + 1] = 3.0;
-            } else if ((theta1 <= thetap4) && (thetap4 <= theta2)) {
-                d1 = thetap4 - theta1;
-                d2 = theta2 - thetap4;
-                if (d1 < d2)
-                    iPeak[i] = 4.0;
-                else
-                    iPeak[i + 1] = 4.0;
-            } else if ((theta1 <= thetap5) && (thetap5 <= theta2)) {
-                d1 = thetap5 - theta1;
-                d2 = theta2 - thetap5;
-                if (d1 < d2)
-                    iPeak[i] = 5.0;
-                else
-                    iPeak[i + 1] = 5.0;
-            }
-            theta1 = theta2;
-        }
-
-        /* correct the peaks */
-        d = (int) Math.ceil(paramOb.getSfEcg() / 64);
-        for (i = 1; i <= n; i++) {
-            if (iPeak[i] == 1 || iPeak[i] == 3 || iPeak[i] == 5) {
-
-                j1 = (1 > (i - d) ? 1 : (i - d)); //MAX(1,i-d);
-                j2 = (n < (i + d) ? n : (i + d)); //MIN(n,i+d);
-                jmax = j1;
-                zmax = z[j1];
-                for (j = j1 + 1; j <= j2; j++) {
-                    if (z[j] > zmax) {
-                        jmax = j;
-                        zmax = z[j];
-                    }
-                }
-                if (jmax != i) {
-                    iPeak[jmax] = iPeak[i];
-                    iPeak[i] = 0;
-                }
-            } else if (iPeak[i] == 2 || iPeak[i] == 4) {
-                j1 = (1 > (i - d) ? 1 : (i - d));//MAX(1,i-d);
-                j2 = (n < (i + d) ? n : (i + d)); //MIN(n,i+d);
-                jmin = j1;
-                zmin = z[j1];
-                for (j = j1 + 1; j <= j2; j++) {
-                    if (z[j] < zmin) {
-                        jmin = j;
-                        zmin = z[j];
-                    }
-                }
-                if (jmin != i) {
-                    iPeak[jmin] = iPeak[i];
-                    iPeak[i] = 0;
-                }
-            }
-        }
+    public class EcgMeasurement {
+        double voltage;
+        double time;
     }
 
-    /*
-     * DO RUN PART OF PROGRAM
-     */
-    private boolean doRun() {
-        int i, j, k, Nrr, Nt, Nts;
+    public class Generator {
+        int i, j, k, Nrr, Nt;
         int q;
-        double[] x;
         double tstep, tecg, rrmean, hrfact, hrfact2;
-        double qd;
-        double[] xt, yt, zt, xts, yts, zts;
-        double timev, zmin, zmax, zrange;
-        double[] ipeak;
+        double timev;
+        double[] x = new double[4];
 
-        // perform some checks on input values
-        q = (int) Math.rint(paramOb.getSf() / paramOb.getSfEcg());
-        qd = (double) paramOb.getSf() / (double) paramOb.getSfEcg();
+        public Generator()
+        {
+            // perform some checks on input values
+            q = (int) Math.rint(paramOb.getSf() / paramOb.getSfEcg());
 
-        /* convert angles from degrees to radians and copy a vector to ai*/
-        for (i = 1; i <= 5; i++) {
-            ti[i] = paramOb.getTheta(i - 1) * PI / 180.0;
-            ai[i] = paramOb.getA(i - 1);
+            // convert angles from degrees to radians and copy a vector to ai
+            for (i = 1; i <= 5; i++) {
+                ti[i] = paramOb.getTheta(i - 1) * PI / 180.0;
+                ai[i] = paramOb.getA(i - 1);
+            }
+
+            // adjust extrema parameters for mean heart rate
+            hrfact = Math.sqrt(paramOb.getHrMean() / 60);
+            hrfact2 = Math.sqrt(hrfact);
+
+            for (i = 1; i <= 5; i++)
+                bi[i] = paramOb.getB(i - 1) * hrfact;
+
+            ti[1] *= hrfact2;
+            ti[2] *= hrfact;
+            ti[3] *= 1.0;
+            ti[4] *= hrfact;
+            ti[5] *= 1.0;
+
+
+            ecgLog.println("Approximate number of heart beats: " + paramOb.getN());
+            ecgLog.println("ECG sampling frequency: " + paramOb.getSfEcg() + " Hertz");
+            ecgLog.println("Internal sampling frequency: " + paramOb.getSf() + " Hertz");
+            ecgLog.println("Amplitude of additive uniformly distributed noise: " + paramOb.getANoise() + " mV");
+            ecgLog.println("Heart rate mean: " + paramOb.getHrMean() + " beats per minute");
+            ecgLog.println("Heart rate std: " + paramOb.getHrStd() + " beats per minute");
+            ecgLog.println("Low frequency: " + paramOb.getFLo() + " Hertz");
+            ecgLog.println("High frequency std: " + paramOb.getFHiStd() + " Hertz");
+            ecgLog.println("Low frequency std: " + paramOb.getFLoStd() + " Hertz");
+            ecgLog.println("High frequency: " + paramOb.getFHi() + " Hertz");
+            ecgLog.println("LF/HF ratio: " + paramOb.getLfHfRatio());
+            ecgLog.println("time step milliseconds: " + paramOb.getEcgAnimateInterval() + "\n");
+            ecgLog.println("Order of Extrema:");
+            ecgLog.println("      theta(radians)");
+            ecgLog.println("P: [" + ti[1] + "\t]");
+            ecgLog.println("Q: [" + ti[2] + "\t]");
+            ecgLog.println("R: [" + ti[3] + "\t]");
+            ecgLog.println("S: [" + ti[4] + "\t]");
+            ecgLog.println("T: [" + ti[5] + "\t]\n");
+            ecgLog.println("      a(calculated)");
+            ecgLog.println("P: [" + ai[1] + "\t]");
+            ecgLog.println("Q: [" + ai[2] + "\t]");
+            ecgLog.println("R: [" + ai[3] + "\t]");
+            ecgLog.println("S: [" + ai[4] + "\t]");
+            ecgLog.println("T: [" + ai[5] + "\t]\n");
+            ecgLog.println("      b(calculated)");
+            ecgLog.println("P: [" + bi[1] + "\t]");
+            ecgLog.println("Q: [" + bi[2] + "\t]");
+            ecgLog.println("R: [" + bi[3] + "\t]");
+            ecgLog.println("S: [" + bi[4] + "\t]");
+            ecgLog.println("T: [" + bi[5] + "\t]\n");
+
+
+            // Initialise the vector
+            x[1] = xinitial;
+            x[2] = yinitial;
+            x[3] = zinitial;
+
+            // initialise seed
+            rseed = -paramOb.getSeed();
+
+           // calculate time scales
+            h = 1.0 / (double) paramOb.getSf();
+            tstep = 1.0 / (double) paramOb.getSfEcg();
+
+            // calculate length of RR time series
+            rrmean = (60.0 / paramOb.getHrMean());
+            Nrr = (int) Math.pow(2.0, Math.ceil(Math.log(paramOb.getN() * rrmean * paramOb.getSf()) / Math.log(2.0)));
+
+            ecgLog.println("Using " + Nrr + " = 2^ " + (int) (Math.log(1.0 * Nrr) / Math.log(2.0)) + " samples for calculating RR intervals");
+
+            // create rrProcess with required spectrum
+            rr = new double[Nrr + 1];
+            rrProcess(rr, paramOb.getFLo(), paramOb.getFHi(), paramOb.getFLoStd(),
+                    paramOb.getFHiStd(), paramOb.getLfHfRatio(), paramOb.getHrMean(),
+                    paramOb.getHrStd(), paramOb.getSf(), Nrr);
+
+            // create piecewise constant rr
+            rrpc = new double[(2 * Nrr) + 1];
+            tecg = 0.0;
+            i = 1;
+            j = 1;
+            while (i <= Nrr) {
+                tecg += rr[j];
+                j = (int) Math.rint(tecg / h);
+                for (k = i; k <= j; k++)
+                    rrpc[k] = rr[i];
+                i = j + 1;
+            }
+            Nt = j;
+
+            ecgResultNumRows = (int) Math.ceil( (double) Nt / q);
+            ecgResultVoltage = new double[ecgResultNumRows];
+            ecgResultTime = new double[ecgResultNumRows];
+
+            // integrate dynamical system using fourth order Runge-Kutta
+            timev = 0.0;
+
+
+            // insert into the ECG data table
+            ecgLog.println("Generating result matrix...");
+            i = 1;
+            j = 0;
+
+            /*
+            Old code for reference:
+            for (i = 1, j = 0; i <= Nt; i++) {
+                Rk4(x, mstate, timev, h, x);
+                timev += h;
+
+                if (i % q == 0) {
+                    final double noise = paramOb.getANoise() * (2.0 * ran1() - 1.0);
+                    ecgResultVoltage[j] = ((x[3] - zMin) * (1.6) / zRange - 0.4) + noise;
+
+                    // separate
+                    ecgResultTime[j] = (j) * tstep;
+                    j++;
+                }
+            }
+            */
         }
 
-        /* adjust extrema parameters for mean heart rate */
-        hrfact = Math.sqrt(paramOb.getHrMean() / 60);
-        hrfact2 = Math.sqrt(hrfact);
 
-        for (i = 1; i <= 5; i++)
-            bi[i] = paramOb.getB(i - 1) * hrfact;
+        // constants for scaling the signal to lie between -0.4 and 1.2 mV
+        final double zMin = -0.01;
+        final double zRange = 0.066;
 
-        ti[1] *= hrfact2;
-        ti[2] *= hrfact;
-        ti[3] *= 1.0;
-        ti[4] *= hrfact;
-        ti[5] *= 1.0;
+        public EcgMeasurement next() {
+            EcgMeasurement measurement = new EcgMeasurement();
 
-        /* declare state vector */
-        //x=dvector(1,mstate);
-        x = new double[4];
+            do {
+                Rk4(x, mstate, timev, h, x);
+                timev += h;
+            } while ((i++ % q != 0));
 
-        ecgLog.println("Approximate number of heart beats: " + paramOb.getN());
-        ecgLog.println("ECG sampling frequency: " + paramOb.getSfEcg() + " Hertz");
-        ecgLog.println("Internal sampling frequency: " + paramOb.getSf() + " Hertz");
-        ecgLog.println("Amplitude of additive uniformly distributed noise: " + paramOb.getANoise() + " mV");
-        ecgLog.println("Heart rate mean: " + paramOb.getHrMean() + " beats per minute");
-        ecgLog.println("Heart rate std: " + paramOb.getHrStd() + " beats per minute");
-        ecgLog.println("Low frequency: " + paramOb.getFLo() + " Hertz");
-        ecgLog.println("High frequency std: " + paramOb.getFHiStd() + " Hertz");
-        ecgLog.println("Low frequency std: " + paramOb.getFLoStd() + " Hertz");
-        ecgLog.println("High frequency: " + paramOb.getFHi() + " Hertz");
-        ecgLog.println("LF/HF ratio: " + paramOb.getLfHfRatio());
-        ecgLog.println("time step milliseconds: " + paramOb.getEcgAnimateInterval() + "\n");
-        ecgLog.println("Order of Extrema:");
-        ecgLog.println("      theta(radians)");
-        ecgLog.println("P: [" + ti[1] + "\t]");
-        ecgLog.println("Q: [" + ti[2] + "\t]");
-        ecgLog.println("R: [" + ti[3] + "\t]");
-        ecgLog.println("S: [" + ti[4] + "\t]");
-        ecgLog.println("T: [" + ti[5] + "\t]\n");
-        ecgLog.println("      a(calculated)");
-        ecgLog.println("P: [" + ai[1] + "\t]");
-        ecgLog.println("Q: [" + ai[2] + "\t]");
-        ecgLog.println("R: [" + ai[3] + "\t]");
-        ecgLog.println("S: [" + ai[4] + "\t]");
-        ecgLog.println("T: [" + ai[5] + "\t]\n");
-        ecgLog.println("      b(calculated)");
-        ecgLog.println("P: [" + bi[1] + "\t]");
-        ecgLog.println("Q: [" + bi[2] + "\t]");
-        ecgLog.println("R: [" + bi[3] + "\t]");
-        ecgLog.println("S: [" + bi[4] + "\t]");
-        ecgLog.println("T: [" + bi[5] + "\t]\n");
+            final double noise = paramOb.getANoise() * (2.0 * ran1() - 1.0);
+            measurement.voltage = ((x[3] - zMin) * 1.6 / zRange - 0.4) + noise;
 
-        /* Initialise the vector */
-        x[1] = xinitial;
-        x[2] = yinitial;
-        x[3] = zinitial;
-
-        /* initialise seed */
-        rseed = -paramOb.getSeed();
-
-        /* calculate time scales */
-        h = 1.0 / (double) paramOb.getSf();
-        tstep = 1.0 / (double) paramOb.getSfEcg();
-
-        /* calculate length of RR time series */
-        rrmean = (60.0 / paramOb.getHrMean());
-        Nrr = (int) Math.pow(2.0, Math.ceil(Math.log(paramOb.getN() * rrmean * paramOb.getSf()) / Math.log(2.0)));
-
-        ecgLog.println("Using " + Nrr + " = 2^ " + (int) (Math.log(1.0 * Nrr) / Math.log(2.0)) + " samples for calculating RR intervals");
-
-        /* create rrProcess with required spectrum */
-        rr = new double[Nrr + 1];
-        rrProcess(rr, paramOb.getFLo(), paramOb.getFHi(), paramOb.getFLoStd(),
-                paramOb.getFHiStd(), paramOb.getLfHfRatio(), paramOb.getHrMean(),
-                paramOb.getHrStd(), paramOb.getSf(), Nrr);
-
-        /* create piecewise constant rr */
-        rrpc = new double[(2 * Nrr) + 1];
-        tecg = 0.0;
-        i = 1;
-        j = 1;
-        while (i <= Nrr) {
-            tecg += rr[j];
-            j = (int) Math.rint(tecg / h);
-            for (k = i; k <= j; k++)
-                rrpc[k] = rr[i];
-            i = j + 1;
-        }
-        Nt = j;
-
-        /* integrate dynamical system using fourth order Runge-Kutta*/
-        xt = new double[Nt + 1];
-        yt = new double[Nt + 1];
-        zt = new double[Nt + 1];
-        timev = 0.0;
-        for (i = 1; i <= Nt; i++) {
-            xt[i] = x[1];
-            yt[i] = x[2];
-            zt[i] = x[3];
-            Rk4(x, mstate, timev, h, x);
-            timev += h;
-        }
-
-        /* downsample to ECG sampling frequency */
-        xts = new double[Nt + 1];
-        yts = new double[Nt + 1];
-        zts = new double[Nt + 1];
-
-        j = 0;
-        for (i = 1; i <= Nt; i += q) {
+            // separate
+            measurement.time = (j) * tstep;
             j++;
-            xts[j] = xt[i];
-            yts[j] = yt[i];
-            zts[j] = zt[i];
+
+            return measurement;
         }
-        Nts = j;
-
-        /* do peak detection using angle */
-        ipeak = new double[Nts + 1];
-        detectPeaks(ipeak, xts, yts, zts, Nts);
-
-        /* scale signal to lie between -0.4 and 1.2 mV */
-        zmin = zts[1];
-        zmax = zts[1];
-        for (i = 2; i <= Nts; i++) {
-            if (zts[i] < zmin)
-                zmin = zts[i];
-            else if (zts[i] > zmax)
-                zmax = zts[i];
-        }
-        zrange = zmax - zmin;
-        for (i = 1; i <= Nts; i++)
-            zts[i] = (zts[i] - zmin) * (1.6) / zrange - 0.4;
-
-        /* include additive uniformly distributed measurement noise */
-        for (i = 1; i <= Nts; i++)
-            zts[i] += paramOb.getANoise() * (2.0 * ran1() - 1.0);
-
-        /*
-         * insert into the ECG data table
-         */
-        ecgLog.println("Generating result matrix...");
-
-        ecgResultNumRows = Nts;
-
-        ecgResultTime = new double[ecgResultNumRows];
-        ecgResultVoltage = new double[ecgResultNumRows];
-        ecgResultPeak = new int[ecgResultNumRows];
-
-        for (i = 1; i <= Nts; i++) {
-            ecgResultTime[i - 1] = (i - 1) * tstep;
-            ecgResultVoltage[i - 1] = zts[i];
-            ecgResultPeak[i - 1] = (int) ipeak[i];
-        }
-
-        ecgLog.println("Finished generating result matrix.");
-
-        return true;
     }
 }
