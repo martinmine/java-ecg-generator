@@ -598,10 +598,19 @@ public class GraphPanel extends JPanel implements AdjustmentListener, EcgProvide
         }
     }
 
+    @Override
+    public Point getLastPoint() {
+        return ecgAnimateLastPoint;
+    }
+
+    @Override
+    public Graphics getGraphGraphics() {
+        return ecgFrame.getGraphics();
+    }
 
     /*
-     * Class to plot the ECG animation
-     */
+             * Class to plot the ECG animation
+             */
     class ECGAnimate extends TimerTask {
         private int x = 0;
         private int y;
