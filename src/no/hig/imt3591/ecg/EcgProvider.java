@@ -4,6 +4,7 @@ import java.awt.*;
 
 /**
  * Created by Martin on 10.04.2015.
+ *
  */
 public interface EcgProvider {
     public double getVoltage();
@@ -12,4 +13,6 @@ public interface EcgProvider {
     public double getSkinResistance();
     public Graphics getGraphGraphics();
     public Point getLastPoint();
+    public int getFrameAmplitude();
+    public double getAmplitude();
 }

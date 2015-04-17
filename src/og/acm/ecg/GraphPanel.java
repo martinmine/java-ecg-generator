@@ -481,6 +481,26 @@ public class GraphPanel extends JPanel implements AdjustmentListener, EcgProvide
         return 0;
     }
 
+    @Override
+    public Point getLastPoint() {
+        return ecgAnimateLastPoint;
+    }
+
+    @Override
+    public Graphics getGraphGraphics() {
+        return ecgFrame.getGraphics();
+    }
+
+    @Override
+    public int getFrameAmplitude() {
+        return frameAmplitude;
+    }
+
+    @Override
+    public double getAmplitude() {
+        return paramOb.getAmplitude();
+    }
+
     private class ECGPanel extends JPanel {
 
         public void paintComponent(Graphics g) {
@@ -596,16 +616,6 @@ public class GraphPanel extends JPanel implements AdjustmentListener, EcgProvide
                 }
             }
         }
-    }
-
-    @Override
-    public Point getLastPoint() {
-        return ecgAnimateLastPoint;
-    }
-
-    @Override
-    public Graphics getGraphGraphics() {
-        return ecgFrame.getGraphics();
     }
 
     /*
