@@ -234,6 +234,15 @@ public class GraphPanel extends JPanel implements AdjustmentListener, EcgProvide
     }//GEN-END:initComponents
 
     private void generateButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_generateButtonActionPerformed
+        if (ecgAnimateTimer != null) {
+            ecgAnimateTimer.cancel();
+            ecgAnimateTimer.purge();
+            ecgAnimateTimer = null;
+            pullService.stop();
+            pullService = null;
+            return;
+        }
+
         /*
          * Clear Status text.
          */
@@ -285,10 +294,7 @@ public class GraphPanel extends JPanel implements AdjustmentListener, EcgProvide
 
 
         /* Schedule the Animate Plotting Task */
-        if (ecgAnimateTimer != null) {
-            ecgAnimateTimer.cancel();
-            ecgAnimateTimer.purge();
-        }
+
 
         ecgAnimateTimer = new Timer();
         if (ecgAnimate == null) {

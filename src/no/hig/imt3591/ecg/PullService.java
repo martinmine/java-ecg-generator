@@ -31,4 +31,9 @@ public class PullService {
             }
         }, 0, SAMPLING_FREQUENCY);
     }
+
+    public void stop() {
+        this.timer.cancel();
+        this.timer.purge();
+    }
 }
