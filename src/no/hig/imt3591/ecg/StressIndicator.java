@@ -6,6 +6,9 @@ package no.hig.imt3591.ecg;
 public class StressIndicator {
     private static final StressIndicator INSTANCE = new StressIndicator();
 
+    private double globalAverage;
+    private double currentAverage;
+
     public static StressIndicator getInstance() {
         return INSTANCE;
     }
