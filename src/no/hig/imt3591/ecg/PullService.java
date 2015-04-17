@@ -23,19 +23,12 @@ public class PullService {
         this.timer.schedule(new TimerTask() {
             @Override
             public void run() {
-                pullSignal();
+                ComplexDetector.onSignalReceived(ecgProvider);
                 StressIndicator.getInstance().onSignalReceived(
                         ecgProvider.getSkinResistance(),
                         ecgProvider.getOxygenSaturation(),
                         ecgProvider.getPulse());
             }
         }, 0, SAMPLING_FREQUENCY);
-    }
-
-    private void pullSignal() {
-        double voltage = ecgProvider.getVoltage();
-        double pulse = ecgProvider.getPulse();
-
-        LOGGER.info("v = " + voltage + " @" + pulse);
     }
 }
