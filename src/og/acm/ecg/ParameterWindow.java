@@ -836,7 +836,7 @@ public class ParameterWindow extends JFrame {
             ecgLog.println(errorStr);
         } else {
             errorStr = "There were errors in some parameters!:.\n" + errorStr;
-            ecgLog.print(errorStr);
+            ecgLog.println(errorStr);
         }
         JOptionPane.showMessageDialog(this, errorStr);
 

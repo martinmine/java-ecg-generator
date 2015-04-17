@@ -19,12 +19,14 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.util.Date;
+import java.util.logging.Logger;
 
 public class LogWindow extends JFrame {
 
     private final DateFormat shortTime = DateFormat.getTimeInstance();
     private final DateFormat longDateTime = DateFormat.getDateTimeInstance();
     private javax.swing.JTextArea txtStatus;
+    private static final Logger LOGGER = Logger.getLogger(LogWindow.class.getSimpleName());
 
     /**
      * Creates new form ecgLogWindow
@@ -41,18 +43,13 @@ public class LogWindow extends JFrame {
     }
 
     public void println(String value) {
+        LOGGER.info(value);
         txtStatus.append(getCurShortTime() + value + "\n");
-
-    }
-
-    public void print(String value) {
-        txtStatus.append(getCurShortTime() + value);
 
     }
 
     void clearLog() {
         txtStatus.setText(null);
-
     }
 
     private String getCurShortTime() {
