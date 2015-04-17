@@ -24,9 +24,9 @@ import java.awt.*;
 import java.awt.event.AdjustmentEvent;
 import java.awt.event.AdjustmentListener;
 import java.lang.reflect.Field;
+import java.util.*;
+import java.util.List;
 import java.util.Timer;
-import java.util.TimerTask;
-import java.util.Vector;
 
 public class GraphPanel extends JPanel implements AdjustmentListener {
 
@@ -74,7 +74,7 @@ public class GraphPanel extends JPanel implements AdjustmentListener {
      */
     private boolean readyToPlot;
     private int plotScrollBarValue;
-    private double plotZoom = 0.008;
+    private double plotZoom = 0.004;
     private final double plotZoomInc = 2;
     private Timer ecgAnimateTimer;
     private final Point ecgAnimateLastPoint = new java.awt.Point(0, 0);
@@ -107,6 +107,14 @@ public class GraphPanel extends JPanel implements AdjustmentListener {
     private final LogWindow ecgLog;
     private DefaultTableModel tableValuesModel;
     private ECGPanel ecgFrame;
+
+    /* TEST data (THOMAS) */
+    private PeakDetection pk;
+    private int numMeasurements;
+    private int lastLastPointX;
+    private double total = 0;
+    private double stdDev = 0;
+
     /**
      * Creates new form plotWindow
      */
@@ -114,7 +122,11 @@ public class GraphPanel extends JPanel implements AdjustmentListener {
         this.paramOb = parameters;
         this.calcOb = new EcgCalc(paramOb, logOb);
         this.ecgLog = logOb;
-        
+
+        this.lastLastPointX = 0;
+        this.numMeasurements = 270;
+        this.pk = new PeakDetection(this.numMeasurements);
+
         initComponents();
         initWindow();
     }
@@ -652,6 +664,54 @@ public class GraphPanel extends JPanel implements AdjustmentListener {
                     g.setColor(ecgPlotColor);
                     g.drawLine(lastPoint.x, lastPoint.y, x, y);
 
+                    /* THOMAS TEST CODE */
+                    double frameUnit = frameAmplitude / paramOb.getAmplitude();
+                    double vol = calcOb.getEcgResultVoltage(i);
+
+                    // TODO: Replace vol with ln(HF)
+                    /*
+                    total += vol;
+                    double mean = vol / i;
+                    double temp = 0;
+                    for (int ii = 0; ii<i; ii++) {
+                        double a = calcOb.getEcgResultVoltage(ii);
+                        temp += (mean-a) * (mean-a);
+                    }
+
+                    stdDev = Math.sqrt(temp / i);
+                    */
+
+                    pk.add(vol);
+
+                    if (i != 0  &&  (i % numMeasurements) == 0) {
+
+                        // Testing drawing of mean and stdDev: (known bug... )
+                        /*
+                        int meanY = (int)(frameAmplitude - (mean * frameUnit));
+                        int stdDevY = (int)(frameAmplitude - (stdDev * frameUnit));
+                        int nStdDevY = (int)(frameAmplitude + (stdDev * frameUnit));
+
+                        g.setColor(Color.RED);
+                        g.drawLine(lastLastPointX, meanY, x, meanY);
+                        g.setColor(Color.CYAN);
+                        g.drawLine(lastLastPointX, stdDevY, x, stdDevY);
+                        g.drawLine(lastLastPointX, nStdDevY, x, nStdDevY);
+                        */
+
+                        double d = pk.getFrequency(PeakDetection.HIGH);
+                        System.out.println("d: " + d);
+                        int p = (int)(frameAmplitude - (d * frameUnit));
+
+                        g.setColor(Color.BLUE);
+                        //g.drawOval(lastLastPointX - 2, p - 2, 5, 5);
+                        g.setColor(Color.MAGENTA);
+                        g.drawLine(lastLastPointX, p, x, p);
+                        //g.drawString("" + (Math.round(d * 100.0) / 100.0), lastLastPointX, p);
+                        //g.drawString("" + (Math.round(calcOb.getEcgResultTime(i) * 1000.0) / 1000.0), x - 30, p);
+
+                        lastLastPointX = x;
+                    }
+
                     /*
                      * Set the current point to be the last, and 
                      * get a new point to plot in the following loop.
@@ -678,6 +738,11 @@ public class GraphPanel extends JPanel implements AdjustmentListener {
 
         public void run() {
             curSecond = (int)calcOb.getEcgResultTime(ecgAnimateCurRow);
+
+            /* TODO: on animate:
+            double vol = calcOb.getEcgResultVoltage(ecgAnimateCurRow);
+            System.out.println("curRow " + ecgAnimateCurRow + " V: " + vol);
+            */
 
             if (curSecond > lastSecond) {
                 lastSecond = curSecond;
