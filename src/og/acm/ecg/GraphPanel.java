@@ -69,12 +69,13 @@ public class GraphPanel extends JPanel implements AdjustmentListener, EcgProvide
      */
     private boolean readyToPlot;
     private int plotScrollBarValue;
-    private double plotZoom = 0.004;
+    private double plotZoom = 0.008;
     private final double plotZoomInc = 2;
     private Timer ecgAnimateTimer;
     private final Point ecgAnimateLastPoint = new java.awt.Point(0, 0);
+    private final Point ecgAnimateCurrentPoint = new java.awt.Point(0, 0);
 
-
+    private double curTime;
     private double lastVoltage;
 
 
@@ -110,7 +111,7 @@ public class GraphPanel extends JPanel implements AdjustmentListener, EcgProvide
 
 
     /* TEST data (THOMAS) */
-    private PeakDetection pk;
+    private QRSDetector pk;
     private int numMeasurements;
     private int lastLastPointX;
     private double total = 0;
@@ -130,7 +131,7 @@ public class GraphPanel extends JPanel implements AdjustmentListener, EcgProvide
         // TEST code (Thomas)
         this.lastLastPointX = 0;
         this.numMeasurements = 270;
-        this.pk = new PeakDetection(this.numMeasurements);
+        this.pk = new QRSDetector(this.numMeasurements);
 
         initComponents();
         initWindow();
@@ -317,6 +318,8 @@ public class GraphPanel extends JPanel implements AdjustmentListener, EcgProvide
             ecgAnimate = new ECGAnimate(ecgAnimate);
         }
 
+
+        System.out.println("AnimateInterval: " + paramOb.getEcgAnimateInterval());
         ecgAnimateTimer.scheduleAtFixedRate(ecgAnimate, 0, paramOb.getEcgAnimateInterval());
 
         if (pullService == null) {
@@ -493,6 +496,11 @@ public class GraphPanel extends JPanel implements AdjustmentListener, EcgProvide
     }
 
     @Override
+    public Point getCurrentPoint() {
+        return ecgAnimateCurrentPoint;
+    }
+
+    @Override
     public Graphics getGraphGraphics() {
         return ecgFrame.getGraphics();
     }
@@ -505,6 +513,16 @@ public class GraphPanel extends JPanel implements AdjustmentListener, EcgProvide
     @Override
     public double getAmplitude() {
         return paramOb.getAmplitude();
+    }
+
+    @Override
+    public double getTime() {
+        return curTime;
+    }
+
+    @Override
+    public double getPlotZoom() {
+        return plotZoom;
     }
 
     private class ECGPanel extends JPanel {
@@ -563,10 +581,6 @@ public class GraphPanel extends JPanel implements AdjustmentListener, EcgProvide
                     g.drawLine(lastPoint.x, lastPoint.y, x, y);
 
                     /* THOMAS TEST CODE */
-                    double frameUnit = frameAmplitude / paramOb.getAmplitude();
-                    double vol = calcOb.getEcgResultVoltage(i);
-                    pk.add(vol);
-
                     // TODO: Replace vol with ln(HF)
                     /*
                     total += vol;
@@ -579,8 +593,6 @@ public class GraphPanel extends JPanel implements AdjustmentListener, EcgProvide
 
                     stdDev = Math.sqrt(temp / i);
                     */
-
-                    pk.add(vol);
 
                     if (i != 0  &&  (i % numMeasurements) == 0) {
 
@@ -597,14 +609,6 @@ public class GraphPanel extends JPanel implements AdjustmentListener, EcgProvide
                         g.drawLine(lastLastPointX, nStdDevY, x, nStdDevY);
                         */
 
-                        double d = pk.getFrequency(PeakDetection.HIGH);
-                        System.out.println("d: " + d);
-                        int p = (int)(frameAmplitude - (d * frameUnit));
-
-                        g.setColor(Color.BLUE);
-                        //g.drawOval(lastLastPointX - 2, p - 2, 5, 5);
-                        g.setColor(Color.MAGENTA);
-                        g.drawLine(lastLastPointX, p, x, p);
                         //g.drawString("" + (Math.round(d * 100.0) / 100.0), lastLastPointX, p);
                         //g.drawString("" + (Math.round(calcOb.getEcgResultTime(i) * 1000.0) / 1000.0), x - 30, p);
 
@@ -628,27 +632,22 @@ public class GraphPanel extends JPanel implements AdjustmentListener, EcgProvide
              * Class to plot the ECG animation
              */
     class ECGAnimate extends TimerTask {
-        private int x = 0;
-        private int y;
         private int curSecond = 0;
         private double lastSecond = 0;
         private final Graphics ga = ecgFrame.getGraphics();
         private EcgCalc.EcgMeasurement measure;
         private double totTime;
-        private double curTime;
 
         public ECGAnimate() {
             this.measure = generator.next();
-            this.y =  posOriginY - (int) ((measure.voltage) * frameAmplitude / paramOb.getAmplitude());
+            ecgAnimateCurrentPoint.y = posOriginY - (int) ((measure.voltage) * frameAmplitude / paramOb.getAmplitude());
         }
 
         public ECGAnimate(ECGAnimate parent) {
-            this.x = parent.x;
-            this.y = parent.y;
             this.curSecond = parent.curSecond;
             this.lastSecond = parent.lastSecond;
             this.measure = generator.next();
-            this.totTime = parent.totTime + parent.curTime;
+            this.totTime = parent.totTime + curTime;
         }
 
         public void run() {
@@ -658,6 +657,7 @@ public class GraphPanel extends JPanel implements AdjustmentListener, EcgProvide
 
             curSecond = (int)t;
 
+            // Drawing the time - each second on the bottom of -1.4 voltage:
             if (curSecond > lastSecond) {
                 lastSecond = curSecond;
                 /*
@@ -665,50 +665,54 @@ public class GraphPanel extends JPanel implements AdjustmentListener, EcgProvide
                  */
                 ga.setColor(axesNumColor);
                 drawText(ga, NumberFormatter.toString(t, upLimit, loLimit, 2),
-                        x, horizontalScaleY, horizontalScaleWidth, horizontalScaleHeight,
+                        ecgAnimateCurrentPoint.x, horizontalScaleY, horizontalScaleWidth, horizontalScaleHeight,
                         fScaleNumSize, LEFT);
 
                 ga.setColor(frameInsideLineColor);
-                ga.drawLine(x, posFrameY, x, horizontalScaleY + 5);
+                ga.drawLine(ecgAnimateCurrentPoint.x, posFrameY, ecgAnimateCurrentPoint.x, horizontalScaleY + 5);
             }
 
             ga.setColor(ecgPlotColor);
-            ga.drawLine(ecgAnimateLastPoint.x, ecgAnimateLastPoint.y, x, y);
+            ga.drawLine(ecgAnimateLastPoint.x, ecgAnimateLastPoint.y, ecgAnimateCurrentPoint.x, ecgAnimateCurrentPoint.y);
 
             ecgAnimateCurRow++;
             measure = generator.next();
 
             if (ecgAnimateCurRow >= ecgAnimateNumRows) {
+
                 /*
                  * If we reach the end of the Data Table, loop again entire table.
                  */
                 ecgFrame.repaint();
                 ecgAnimateCurRow = 0;
                 ecgAnimateInitialZero = 0;
-                x = 0;
-
-                y = posOriginY - (int) (measure.voltage * frameAmplitude / paramOb.getAmplitude());
-                ecgAnimateLastPoint.setLocation(x, y);
+                ecgAnimateCurrentPoint.x = 0;
+                ecgAnimateCurrentPoint.y = posOriginY - (int) (measure.voltage * frameAmplitude / paramOb.getAmplitude());
+                ecgAnimateLastPoint.setLocation(ecgAnimateCurrentPoint.x, ecgAnimateCurrentPoint.y);
                 curSecond = 0;
                 lastSecond = 0;
 
-            } else if (x > ecgAnimatePanelWidth) {
+            } else if (ecgAnimateCurrentPoint.x > ecgAnimatePanelWidth) {
+
                 /*
                  * If we not reached the end of the Data Table, but we reach to the limit of
                  * the Plot Area. so reset the X coordinate to begin again.
                  */
                 ecgFrame.repaint();
-                x = 0;
-                y = posOriginY - (int) (measure.voltage * frameAmplitude / paramOb.getAmplitude());
+                ecgAnimateCurrentPoint.x = 0;
+                ecgAnimateCurrentPoint.y = posOriginY - (int) (measure.voltage * frameAmplitude / paramOb.getAmplitude());
                 ecgAnimateInitialZero = (int) (t / plotZoom);
-                ecgAnimateLastPoint.setLocation(x, y);
+                ecgAnimateLastPoint.setLocation(ecgAnimateCurrentPoint.x, ecgAnimateCurrentPoint.y);
                 //curSecond  = 0;
                 //lastSecond = 0;
             } else {
-                ecgAnimateLastPoint.setLocation(x, y);
-                x = (int) (t / plotZoom) - ecgAnimateInitialZero;
-                y = posOriginY - (int) (measure.voltage * frameAmplitude / paramOb.getAmplitude());
+                ecgAnimateLastPoint.setLocation(ecgAnimateCurrentPoint.x, ecgAnimateCurrentPoint.y);
+                ecgAnimateCurrentPoint.x = (int) (t / plotZoom) - ecgAnimateInitialZero;
+                ecgAnimateCurrentPoint.y = posOriginY - (int) (measure.voltage * frameAmplitude / paramOb.getAmplitude());
             }
+
+            //ecgAnimateCurrentPoint.y = posOriginY - (int) (measure.voltage * frameAmplitude / paramOb.getAmplitude());
+            //ecgAnimateLastPoint.setLocation(ecgAnimateCurrentPoint.x, ecgAnimateCurrentPoint.y);
         }
     }
 }
