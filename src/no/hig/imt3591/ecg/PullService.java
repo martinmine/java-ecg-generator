@@ -20,16 +20,18 @@ public class PullService {
     public PullService(EcgProvider ecgProvider) {
         this.ecgProvider = ecgProvider;
         this.timer = new Timer();
-        this.timer.schedule(new TimerTask() {
+        this.timer.scheduleAtFixedRate(new TimerTask() {
             @Override
-            public void run() {
-                ComplexDetector.onSignalReceived(ecgProvider);
+                public void run () {
+                    ComplexDetector.onSignalReceived(ecgProvider);
+                /*
                 StressIndicator.getInstance().onSignalReceived(
                         ecgProvider.getSkinResistance(),
                         ecgProvider.getOxygenSaturation(),
                         ecgProvider.getPulse());
-            }
-        }, 0, SAMPLING_FREQUENCY);
+                        */
+                }
+            }, 0, SAMPLING_FREQUENCY);
     }
 
     public void stop() {
