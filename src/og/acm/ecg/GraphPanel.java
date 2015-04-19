@@ -9,6 +9,7 @@ package og.acm.ecg;/*
  * @author Mauricio Villarroel (m.villarroel@acm.og)
  */
 
+import com.sun.scenario.effect.impl.sw.java.JSWLinearConvolvePeer;
 import no.hig.imt3591.ecg.EcgProvider;
 import no.hig.imt3591.ecg.PullService;
 
@@ -119,6 +120,8 @@ public class GraphPanel extends JPanel implements AdjustmentListener, EcgProvide
 
 
     private PullService pullService;
+    private JSlider oxygenSlider;
+    private JSlider skinConductanceSlider;
 
     /**
      * Creates new form plotWindow
@@ -245,6 +248,28 @@ public class GraphPanel extends JPanel implements AdjustmentListener, EcgProvide
         jTextArea1.setBounds(5, 120, 10, 130);
 
         add(mainPanel, java.awt.BorderLayout.CENTER);
+
+        JPanel sliderControllerPanel = new JPanel();
+        sliderControllerPanel.setLayout(new GridLayout(2, 1));
+
+
+        JPanel oxygenControllerPanel = new JPanel();
+        oxygenControllerPanel.setLayout(new BorderLayout());
+        oxygenSlider = new JSlider();
+        oxygenControllerPanel.add(new JLabel("Oxygen saturation"), BorderLayout.NORTH);
+        oxygenControllerPanel.add(oxygenSlider, BorderLayout.SOUTH);
+
+        sliderControllerPanel.add(oxygenControllerPanel);
+
+        JPanel skinConductancePanel = new JPanel();
+        skinConductancePanel.setLayout(new BorderLayout());
+        skinConductanceSlider = new JSlider();
+        skinConductancePanel.add(new JLabel("Skin conductance"), BorderLayout.NORTH);
+        skinConductancePanel.add(skinConductanceSlider, BorderLayout.SOUTH);
+
+        sliderControllerPanel.add(skinConductancePanel);
+
+        add(sliderControllerPanel, BorderLayout.SOUTH);
 
     }//GEN-END:initComponents
 
@@ -482,12 +507,12 @@ public class GraphPanel extends JPanel implements AdjustmentListener, EcgProvide
 
     @Override
     public double getOxygenSaturation() {
-        return 0;
+        return oxygenSlider.getValue();
     }
 
     @Override
     public double getSkinResistance() {
-        return 0;
+        return skinConductanceSlider.getValue();
     }
 
     @Override
