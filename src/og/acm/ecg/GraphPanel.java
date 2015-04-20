@@ -9,9 +9,9 @@ package og.acm.ecg;/*
  * @author Mauricio Villarroel (m.villarroel@acm.og)
  */
 
-import com.sun.scenario.effect.impl.sw.java.JSWLinearConvolvePeer;
 import no.hig.imt3591.ecg.EcgProvider;
 import no.hig.imt3591.ecg.PullService;
+import no.hig.imt3591.ecg.QRSDetector;
 
 import javax.swing.*;
 import javax.swing.border.BevelBorder;
@@ -343,8 +343,6 @@ public class GraphPanel extends JPanel implements AdjustmentListener, EcgProvide
             ecgAnimate = new ECGAnimate(ecgAnimate);
         }
 
-
-        System.out.println("AnimateInterval: " + paramOb.getEcgAnimateInterval());
         ecgAnimateTimer.scheduleAtFixedRate(ecgAnimate, 0, paramOb.getEcgAnimateInterval());
 
         if (pullService == null) {
@@ -604,41 +602,6 @@ public class GraphPanel extends JPanel implements AdjustmentListener, EcgProvide
                      */
                     g.setColor(ecgPlotColor);
                     g.drawLine(lastPoint.x, lastPoint.y, x, y);
-
-                    /* THOMAS TEST CODE */
-                    // TODO: Replace vol with ln(HF)
-                    /*
-                    total += vol;
-                    double mean = vol / i;
-                    double temp = 0;
-                    for (int ii = 0; ii<i; ii++) {
-                        double a = calcOb.getEcgResultVoltage(ii);
-                        temp += (mean-a) * (mean-a);
-                    }
-
-                    stdDev = Math.sqrt(temp / i);
-                    */
-
-                    if (i != 0  &&  (i % numMeasurements) == 0) {
-
-                        // Testing drawing of mean and stdDev: (known bug... )
-                        /*
-                        int meanY = (int)(frameAmplitude - (mean * frameUnit));
-                        int stdDevY = (int)(frameAmplitude - (stdDev * frameUnit));
-                        int nStdDevY = (int)(frameAmplitude + (stdDev * frameUnit));
-
-                        g.setColor(Color.RED);
-                        g.drawLine(lastLastPointX, meanY, x, meanY);
-                        g.setColor(Color.CYAN);
-                        g.drawLine(lastLastPointX, stdDevY, x, stdDevY);
-                        g.drawLine(lastLastPointX, nStdDevY, x, nStdDevY);
-                        */
-
-                        //g.drawString("" + (Math.round(d * 100.0) / 100.0), lastLastPointX, p);
-                        //g.drawString("" + (Math.round(calcOb.getEcgResultTime(i) * 1000.0) / 1000.0), x - 30, p);
-
-                        lastLastPointX = x;
-                    }
 
                     /*
                      * Set the current point to be the last, and 

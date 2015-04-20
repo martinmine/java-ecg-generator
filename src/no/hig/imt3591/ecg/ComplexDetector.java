@@ -1,23 +1,22 @@
 package no.hig.imt3591.ecg;
 
-import og.acm.ecg.QRSDetector;
-
 import java.awt.*;
 import java.util.logging.Logger;
 
 /**
- * Created by Martin on 17.04.2015.
+ * This class handles drawing the QRS complex and the data set being analyzed.
  *
+ * TODO: Find a solution to fit bpm (RR interval)
+ * Problem: The animation starts on an R peak. (middle fo a QRS complex)
+ * Should be dynamically changed depending on sample frequency (SF) and number of measurements (NOM).
+ * SF is a factor into this as some samples doesn't get detected which again plays a huge
+ * role in how many measures we analyze at a time.
+ * Current solution: Happens to looks good with 80 with a Sample frequency of 10.
  */
 public class ComplexDetector {
     private static final Logger LOGGER = Logger.getLogger(ComplexDetector.class.getSimpleName());
 
-    // TODO: Find a solution to fit bpm (RR interval)
-    // Problem: The animation starts on an R peak. (middle fo a QRS complex)
-    // Should be dynamically changed depending on sample frequency (SF) and number of measurements (NOM).
-    // SF is a factor into this as some samples doesn't get detected which again plays a huge
-    // role in how many measures we analyze at a time.
-    // Current solution: Happens to looks good with 80 with a Sample frequency of 10.
+    private static AverageValue globalAverage = new AverageValue(80, 1);
 
     private static final int NUM_MEASUREMENTS = 80;
 
@@ -81,23 +80,13 @@ public class ComplexDetector {
         prevY = currentPoint.y;
 */
 
-        // Retrieve sum of observations before adding. The sum resets after each iterations:
-        // TODO: sum should be ln(R voltage) for detecting sudden cardiac arrest with +/- 1 std
-        double sum = qrsDetector.getSum();
+        //double mean = globalAverage.getValue();
+        //System.out.println("mean: " + mean);
+
         qrsDetector.add(voltage, totalTime);
 
         // Draw each measures:
         if (i != 0  &&  (i % NUM_MEASUREMENTS) == 0) {
-
-            // Updates the mean based on all data up until now, not only those within the
-            int times = (i / NUM_MEASUREMENTS);
-            mean = ((mean * times) + sum) / (times * NUM_MEASUREMENTS);
-            int meanY = frameAmplitude - (int)(mean * (frameAmplitude / amplitude));
-
-            if (startOfMeasurementsPositionX < currentPoint.x) {
-                g.setColor(Color.CYAN);
-                g.drawLine(startOfMeasurementsPositionX, meanY, currentPoint.x, meanY);
-            }
 
             // Retrieve Q point [timestamp, voltage] from observed measures.
             timestamps[QRSDetector.Q] = qrsDetector.getTimestamp(QRSDetector.Q);
@@ -154,3 +143,17 @@ public class ComplexDetector {
         i++;
     }
 }
+
+
+// TODO - For looking at ln(HF):
+/*
+total += vol;
+double mean = vol / i;
+double temp = 0;
+for (int ii = 0; ii<i; ii++) {
+    double a = calcOb.getEcgResultVoltage(ii);
+    temp += (mean-a) * (mean-a);
+}
+
+stdDev = Math.sqrt(temp / i);
+*/

@@ -1,11 +1,14 @@
-package og.acm.ecg;
+package no.hig.imt3591.ecg;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by Thomas on 27.03.2015.
- *
+ * Detects QRS Points from the real time input.
+ * It stores X amount of observations (numObservations) which is being analyzed on every X added.
+ * The analyzeInput function Looks for the Q, R, and S points within the data set (voltages)
+ * After every numObservations this class can give you both the frequency and the timestamp for each of these
+ * points.
  */
 public class QRSDetector {
     private List<Double> voltages;
@@ -13,7 +16,6 @@ public class QRSDetector {
     private double[] voltage;
     private double[] timestamp;
     private int numObservations;
-    private double sum;
 
     public static final int Q = 0;
     public static final int R = 1;
@@ -98,7 +100,6 @@ public class QRSDetector {
         numObservations = num;
         voltage = new double[3];
         timestamp = new double[3];
-        sum = 0.0d;
     }
 
     public void add(double voltage, double time) {
@@ -107,13 +108,11 @@ public class QRSDetector {
         if (voltages.size() == numObservations) {
             voltages.clear();
             timestamps.clear();
-            sum = 0.0d;
         }
 
         // Add new values
         timestamps.add(time);
         voltages.add(voltage);
-        sum += voltage;
 
         // Got enough data to analyze:
         if (voltages.size() == numObservations) {
@@ -127,9 +126,5 @@ public class QRSDetector {
 
     public double getTimestamp(int type) {
         return timestamp[type];
-    }
-
-    public double getSum() {
-        return sum;
     }
 }

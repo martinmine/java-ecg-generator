@@ -10,7 +10,7 @@ import java.util.logging.Logger;
 public class PullService {
     private Timer timer;
     private EcgProvider ecgProvider;
-    private static final int SAMPLING_FREQUENCY = 500;
+    private static final int SAMPLING_FREQUENCY = 10;
     private static final Logger LOGGER = Logger.getLogger(PullService.class.getSimpleName());
 
     /**
@@ -24,12 +24,10 @@ public class PullService {
             @Override
                 public void run () {
                     ComplexDetector.onSignalReceived(ecgProvider);
-                /*
-                StressIndicator.getInstance().onSignalReceived(
+                    StressIndicator.getInstance().onSignalReceived(
                         ecgProvider.getSkinResistance(),
                         ecgProvider.getOxygenSaturation(),
                         ecgProvider.getPulse());
-                        */
                 }
             }, 0, SAMPLING_FREQUENCY);
     }
