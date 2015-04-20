@@ -3,7 +3,8 @@ package no.hig.imt3591.ecg;
 import java.util.logging.Logger;
 
 /**
- * Created by Martin on 17.04.2015.
+ * Attempts to detect stress levels based on comparing current values with normal
+ * behaviour based on average values.
  */
 public class StressIndicator {
     private static final StressIndicator INSTANCE = new StressIndicator();

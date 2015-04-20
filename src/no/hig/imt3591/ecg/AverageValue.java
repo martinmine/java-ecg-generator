@@ -15,14 +15,24 @@ public class AverageValue {
     public AverageValue() {
     }
 
+    /**
+     * @return Current average.
+     */
     public double getValue() {
         return currentTotal / count;
     }
 
+    /**
+     * @return Amount of values.
+     */
     public int getCount() {
         return count;
     }
 
+    /**
+     * Adds a value to the set.
+     * @param value New value.
+     */
     public void putValue(double value) {
         currentTotal += value;
         count++;

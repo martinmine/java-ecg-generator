@@ -2,11 +2,9 @@ package no.hig.imt3591.ecg;
 
 import no.hig.imt3591.id3.DecisionTree;
 
-import java.util.LinkedList;
-import java.util.List;
 
 /**
- * Created by Martin on 17.04.2015.
+ * Creates decisions based on input data towards decision tree(s).
  */
 public class DecisionMaking {
     private static DecisionTree ecgTree;

@@ -30,8 +30,9 @@ public class ID3TestClass {
                     case 1:
                         return new Integer[]{0,1};
                     case 2:
-                    default:
                         return new Integer[]{0,1};
+                    default:
+                        return null;
                 }
         };
 
