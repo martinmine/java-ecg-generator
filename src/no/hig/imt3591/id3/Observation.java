@@ -16,15 +16,15 @@ public class Observation {
         return resultType;
     }
 
-    public Double[] getTuple() {
-        return tuple;
+    public double getObservationValue(int index) {
+        return tuple[index];
     }
 
     public ITreeResult createInstance() {
         try {
             return resultType.newInstance();
         } catch (Exception e) {
-            throw new RuntimeException("Unable to instanciate a new instance of the tree output value", e);
+            throw new RuntimeException("Unable to instantiate a new instance of the tree output value", e);
         }
     }
 }

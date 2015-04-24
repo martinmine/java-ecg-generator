@@ -28,9 +28,9 @@ public class Entropy {
      * @param value The value that has to be equal on the test attribute.
      */
     public Entropy (final List<Observation> set, final int attributes, final double value) {
-        set.stream().filter(observation -> observation.getTuple()[attributes].equals(value)).forEach(observation -> {
-            addCount(observation.getResultType());
-        });
+        set.stream()
+                .filter(observation -> observation.getObservationValue(attributes) == (value))
+                .forEach(observation -> addCount(observation.getResultType()));
     }
 
     public static class EntropySet {
@@ -43,11 +43,11 @@ public class Entropy {
         }
     }
 
-    public static EntropySet filterByThreshold(final List<Observation> set, final int attributeIndex, final double threshold) {
+    public static EntropySet splitAtThreshold(final List<Observation> set, final int attributeIndex, final double threshold) {
         final EntropySet entropy = new EntropySet();
 
         for (final Observation observation : set) {
-            final Entropy comparing = observation.getTuple()[attributeIndex] <= threshold ? entropy.left : entropy.right;
+            final Entropy comparing = observation.getObservationValue(attributeIndex) <= threshold ? entropy.left : entropy.right;
             comparing.addCount(observation.getResultType());
         }
 

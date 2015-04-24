@@ -29,7 +29,7 @@ public class DecisionTree {
         this.fields = fields;
         this.nameProvider = nameProvider;
         this.metadataProvider = metadataProvider;
-        this.root = split(set, new LinkedList<>());
+        this.root = split(set);
     }
 
     /**
@@ -46,10 +46,9 @@ public class DecisionTree {
      * also operates on continuous values.
      * See http://en.wikipedia.org/wiki/ID3_algorithm
      * @param set Current working subset
-     * @param closedList Attributes that has been plotted in the tree.
      * @return New node in the tree with its children
      */
-    private DecisionNode split(final List<Observation> set, final List<Integer> closedList) {
+    private DecisionNode split(final List<Observation> set) {
         final Entropy setEntropy = new Entropy(set);
         final int setSize = set.size();
 
@@ -62,32 +61,28 @@ public class DecisionTree {
          */
         for (int i = 0; i < fields; i++) {
             final int fieldType = metadataProvider.getAttributeType(i);
-            if (!closedList.contains(i) || fieldType == IAttributeMetadataProvider.CONTINUOUS) {
+            double subsetEntropy = setEntropy.getEntropy();
 
-                double subsetEntropy = setEntropy.getEntropy();
-
-                if (fieldType == IAttributeMetadataProvider.CATEGORICAL) {
-                    Double[] fieldValues = nameProvider.getAttributeValues(i);
-                    for (double fieldValue : fieldValues) {
-                        Entropy fieldEntropy = new Entropy(set, i, fieldValue);
-                        subsetEntropy -= getInformationGain(fieldEntropy, setSize);
-                    }
-                } else if (fieldType == IAttributeMetadataProvider.CONTINUOUS) {
-                    threshold = findLowestSplit(set, i);
-                    Entropy.EntropySet setSplit = Entropy.filterByThreshold(set, i, threshold);
-                    subsetEntropy -= getInformationGain(setSplit.left, setSize);
-                    subsetEntropy -= getInformationGain(setSplit.right, setSize);
+            if (fieldType == IAttributeMetadataProvider.CATEGORICAL) {
+                Double[] fieldValues = nameProvider.getAttributeValues(i);
+                for (double fieldValue : fieldValues) {
+                    Entropy fieldEntropy = new Entropy(set, i, fieldValue);
+                    subsetEntropy -= getInformationGain(fieldEntropy, setSize);
                 }
+            } else if (fieldType == IAttributeMetadataProvider.CONTINUOUS) {
+                threshold = findLowestThreshold(set, i);
+                Entropy.EntropySet setSplit = Entropy.splitAtThreshold(set, i, threshold);
+                subsetEntropy -= getInformationGain(setSplit.left, setSize);
+                subsetEntropy -= getInformationGain(setSplit.right, setSize);
+            }
 
-                if (subsetEntropy > highestGain) {
-                    highestGain = subsetEntropy;
-                    highestGainField = i;
-                }
+            if (subsetEntropy > highestGain) {
+                highestGain = subsetEntropy;
+                highestGainField = i;
             }
         }
 
         final DecisionNode node = new DecisionNode(highestGainField);
-        closedList.add(highestGainField);
 
         /**
          * Then we expand the values for the node with the lowest entropy/highest information gain
@@ -101,23 +96,23 @@ public class DecisionTree {
                 if (trueFalseSubsetCount.getEntropy() == 0) {
                     node.addChild(new LeafNode(name, subset.get(0).createInstance()));
                 } else {
-                    node.addChild(new AttributeNode(name, split(subset, new LinkedList<>(closedList))));
+                    node.addChild(new AttributeNode(name, split(subset)));
                 }
             }
-        } else if (attributeType == IAttributeMetadataProvider.CONTINUOUS){
+        } else if (attributeType == IAttributeMetadataProvider.CONTINUOUS) {
             final List<Observation> subsetA = new LinkedList<>();
             final List<Observation> subsetB = new LinkedList<>();
 
             // Filter at threshold
             for (final Observation observation : set) {
-                (observation.getTuple()[highestGainField] <= threshold ? subsetA : subsetB).add(observation);
+                (observation.getObservationValue(highestGainField) <= threshold ? subsetA : subsetB).add(observation);
             }
 
             if (subsetA.size() > 0) {
                 if (new Entropy(subsetA).getEntropy() == 0) {
                     node.addChild(new AlphaLeafNode(threshold, subsetA.get(0).createInstance()));
                 } else {
-                    node.addChild(new AlphaAttributeNode(threshold, split(subsetA, new LinkedList<>(closedList))));
+                    node.addChild(new AlphaAttributeNode(threshold, split(subsetA)));
                 }
             }
 
@@ -125,7 +120,7 @@ public class DecisionTree {
                 if (new Entropy(subsetB).getEntropy() == 0) {
                     node.addChild(new BetaLeafNode(threshold, subsetB.get(0).createInstance()));
                 } else {
-                    node.addChild(new BetaAttributeNode(threshold, split(subsetB, new LinkedList<>(closedList))));
+                    node.addChild(new BetaAttributeNode(threshold, split(subsetB)));
                 }
             }
         }
@@ -139,13 +134,13 @@ public class DecisionTree {
      * @param index The index of the attribute that will be.
      * @return The threshold value that gives the most information gain.
      */
-    private double findLowestSplit(final List<Observation> set, final int index) {
+    private double findLowestThreshold(final List<Observation> set, final int index) {
         double lowestEntropy = 1;
         double lowestThreshold = 0;
 
         for (int i = 1; i < set.size(); i++) {
-            final double threshold = set.get(i).getTuple()[index];
-            final Entropy.EntropySet entropy = Entropy.filterByThreshold(set, index, threshold);
+            final double threshold = set.get(i).getObservationValue(index);
+            final Entropy.EntropySet entropy = Entropy.splitAtThreshold(set, index, threshold);
 
             final double subsetEntropy = (entropy.left.getEntropy() + entropy.right.getEntropy()) / 2;
 
@@ -177,7 +172,7 @@ public class DecisionTree {
      */
     private List<Observation> filterSet(final List<Observation> set, final int field, final double condition) {
         return set.stream()
-                .filter(observation -> observation.getTuple()[field].equals(condition))
+                .filter(observation -> observation.getObservationValue(field) == condition)
                 .collect(Collectors.toCollection(LinkedList::new));
     }
 }

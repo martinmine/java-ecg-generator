@@ -34,7 +34,7 @@ public class DecisionNode {
      */
     public ITreeResult search(final Observation set) {
         for (final AttributeNode attributeNode : children) {
-            if (attributeNode.canVisit(set.getTuple()[attribute])) {
+            if (attributeNode.canVisit(set.getObservationValue(attribute))) {
                 return attributeNode.visit(set);
             }
         }
