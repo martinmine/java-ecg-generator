@@ -8,20 +8,20 @@ public class ID3TestClass {
     private static List<Integer[]> observations = new LinkedList<>();
 
     public static void main(String[] args) {
-        observations.add(new Integer[]{0, 0, 0, 0, 10}); //D1
-        observations.add(new Integer[]{0, 0, 1, 0, 7});  //D2
-        observations.add(new Integer[]{1, 0, 0, 1, 6});  //D3
-        observations.add(new Integer[]{2, 0, 0, 1, 4});  //D4
-        observations.add(new Integer[]{2, 1, 0, 1, 9});  //D5
-        observations.add(new Integer[]{2, 1, 1, 0, 8});  //D6
-        observations.add(new Integer[]{1, 1, 1, 1, 2});  //D7
-        observations.add(new Integer[]{0, 0, 0, 0, 10}); //D8
-        observations.add(new Integer[]{0, 1, 0, 1, 5});  //D9
-        observations.add(new Integer[]{2, 1, 0, 1, 5});  //D10
-        observations.add(new Integer[]{0, 1, 1, 1, 5});  //D11
-        observations.add(new Integer[]{1, 0, 1, 1, 5});  //D12
-        observations.add(new Integer[]{1, 1, 0, 1, 5});  //D13
-        observations.add(new Integer[]{2, 0, 1, 0, 10}); //D14
+        observations.add(new Integer[]{0, 0, 0, 10, 0}); //D1
+        observations.add(new Integer[]{0, 0, 1, 7, 0});  //D2
+        observations.add(new Integer[]{1, 0, 0, 6, 1});  //D3
+        observations.add(new Integer[]{2, 0, 0, 4, 1});  //D4
+        observations.add(new Integer[]{2, 1, 0, 9, 1});  //D5
+        observations.add(new Integer[]{2, 1, 1, 8, 0});  //D6
+        observations.add(new Integer[]{1, 1, 1, 2, 1});  //D7
+        observations.add(new Integer[]{0, 0, 0, 10, 0}); //D8
+        observations.add(new Integer[]{0, 1, 0, 5, 1});  //D9
+        observations.add(new Integer[]{2, 1, 0, 5, 1});  //D10
+        observations.add(new Integer[]{0, 1, 1, 5, 1});  //D11
+        observations.add(new Integer[]{1, 0, 1, 5, 1});  //D12
+        observations.add(new Integer[]{1, 1, 0, 5, 1});  //D13
+        observations.add(new Integer[]{2, 0, 1, 10, 0}); //D14
 
         IAttributeNameProvider nameProvider = i -> {
                 switch (i) {
@@ -53,7 +53,8 @@ public class ID3TestClass {
         boolean failed = false;
         for (Integer[] set : observations) {
             boolean result = tree.search(new int[]{set[0], set[1], set[2], set[4]});
-            if (result == (set[3] == 1)) {
+            boolean outputResult = (set[3] == 1);
+            if (result != outputResult) {
                 failed = true;
                 System.out.println("Test failed on set " + Arrays.toString(set));
             } else {
