@@ -7,8 +7,8 @@ import no.hig.imt3591.id3.Observation;
  * Concrete test on an categorical attributes.
  */
 public class AttributeNode {
-    private double value;
-    private DecisionNode next;
+    private final double value;
+    private final DecisionNode next;
 
     public AttributeNode(final double value, final DecisionNode next) {
         this.value = value;
@@ -23,7 +23,7 @@ public class AttributeNode {
         return next.search(set);
     }
 
-    protected double getValue() {
+    double getValue() {
         return value;
     }
 }

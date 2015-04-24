@@ -4,8 +4,8 @@ package no.hig.imt3591.id3;
  * Created by Martin on 24.04.2015.
  */
 public class Observation {
-    private Class<? extends ITreeResult> resultType;
-    private Double[] tuple;
+    private final Class<? extends ITreeResult> resultType;
+    private final Double[] tuple;
 
     public Observation(Class<? extends ITreeResult> resultType, Double[] tuple) {
         this.resultType = resultType;
