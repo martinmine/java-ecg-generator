@@ -13,7 +13,6 @@ import java.util.stream.Collectors;
 public class DecisionTree {
     private DecisionNode root;
     private int fields;
-    private double comparator;
     private IAttributeNameProvider nameProvider;
     private IAttributeMetadataProvider metadataProvider;
 
@@ -22,14 +21,12 @@ public class DecisionTree {
      * @param set The data-set to train (build) the decision tree. This has to be an array
      *            where the last integer in the value is true/false.
      * @param fields The length fields/indexes of the integer array should be used in the set. Count of attributes.
-     * @param comparator What value will be considered as true in the end of the array for one entry/tuple in the data-set.
      * @param nameProvider Provides values for attributes that is not continuous.
      * @param metadataProvider Provides metadata about each attribute.
      */
-    public DecisionTree(List<Observation> set, int fields, double comparator,
+    public DecisionTree(List<Observation> set, int fields,
                         IAttributeNameProvider nameProvider, IAttributeMetadataProvider metadataProvider) {
         this.fields = fields;
-        this.comparator = comparator;
         this.nameProvider = nameProvider;
         this.metadataProvider = metadataProvider;
         this.root = split(set, new LinkedList<>());
@@ -40,7 +37,7 @@ public class DecisionTree {
      * @param tuple The data that will be tested against the tree.
      * @return The output value of the data-set.
      */
-    public boolean search(Observation tuple) {
+    public ITreeResult search(Observation tuple) {
         return root.search(tuple);
     }
 
@@ -55,7 +52,7 @@ public class DecisionTree {
     private DecisionNode split(List<Observation> set, List<Integer> closedList) {
         double lowestGain = 0;
         int lowestGainField = 0;
-        Entropy setEntropy = new Entropy(set, comparator);
+        Entropy setEntropy = new Entropy(set);
         int setSize = set.size();
         double threshold = 0;
 
@@ -70,12 +67,12 @@ public class DecisionTree {
                 if (fieldType == IAttributeMetadataProvider.CATEGORICAL) {
                     Double[] fieldValues = nameProvider.getAttributeValues(i);
                     for (double fieldValue : fieldValues) {
-                        Entropy fieldEntropy = new Entropy(set, i, fieldValue, comparator);
+                        Entropy fieldEntropy = new Entropy(set, i, fieldValue);
                         subsetEntropy -= getInformationGain(fieldEntropy, setSize);
                     }
                 } else if (fieldType == IAttributeMetadataProvider.CONTINUOUS) {
                     threshold = findLowestSplit(set, i);
-                    Entropy.EntropySet setSplit = Entropy.filterByThreshold(set, i, comparator, threshold);
+                    Entropy.EntropySet setSplit = Entropy.filterByThreshold(set, i, threshold);
                     subsetEntropy -= getInformationGain(setSplit.left, setSize);
                     subsetEntropy -= getInformationGain(setSplit.right, setSize);
                 }
@@ -97,10 +94,10 @@ public class DecisionTree {
         if (attributeType == IAttributeMetadataProvider.CATEGORICAL) {
             for (double name : nameProvider.getAttributeValues(lowestGainField)) {
                 List<Observation> subset = filterSet(set, lowestGainField, name);
-                Entropy trueFalseSubsetCount = new Entropy(subset, comparator);
+                Entropy trueFalseSubsetCount = new Entropy(subset);
 
                 if (trueFalseSubsetCount.getEntropy() == 0) {
-                    node.addChild(new LeafNode(name, subset.get(0).getResultValue() == comparator));
+                    node.addChild(new LeafNode(name, subset.get(0).createInstance()));
                 } else {
                     node.addChild(new AttributeNode(name, split(subset, new LinkedList<>(closedList))));
                 }
@@ -115,16 +112,16 @@ public class DecisionTree {
             }
 
             if (subsetA.size() > 0) {
-                if (new Entropy(subsetA, comparator).getEntropy() == 0) {
-                    node.addChild(new AlphaLeafNode(threshold, subsetA.get(0).getResultValue() == comparator));
+                if (new Entropy(subsetA).getEntropy() == 0) {
+                    node.addChild(new AlphaLeafNode(threshold, subsetA.get(0).createInstance()));
                 } else {
                     node.addChild(new AlphaAttributeNode(threshold, split(subsetA, new LinkedList<>(closedList))));
                 }
             }
 
             if (subsetB.size() > 0) {
-                if (new Entropy(subsetB, comparator).getEntropy() == 0) {
-                    node.addChild(new BetaLeafNode(threshold, subsetB.get(0).getResultValue() == comparator));
+                if (new Entropy(subsetB).getEntropy() == 0) {
+                    node.addChild(new BetaLeafNode(threshold, subsetB.get(0).createInstance()));
                 } else {
                     node.addChild(new BetaAttributeNode(threshold, split(subsetB, new LinkedList<>(closedList))));
                 }
@@ -146,7 +143,7 @@ public class DecisionTree {
 
         for (int i = 1; i < set.size(); i++) {
             double threshold = set.get(i).getTuple()[index];
-            Entropy.EntropySet entropy = Entropy.filterByThreshold(set, index, this.comparator, threshold);
+            Entropy.EntropySet entropy = Entropy.filterByThreshold(set, index, threshold);
 
             double subsetEntropy = (entropy.left.getEntropy() + entropy.right.getEntropy()) / 2;
 

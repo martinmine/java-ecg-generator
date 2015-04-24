@@ -4,24 +4,27 @@ package no.hig.imt3591.id3;
  * Created by Martin on 24.04.2015.
  */
 public class Observation {
-    private boolean resultValue;
+    private Class<? extends ITreeResult> resultType;
     private Double[] tuple;
 
-    public Observation(boolean resultValue, Double[] tuple) {
-        this.resultValue = resultValue;
+    public Observation(Class<? extends ITreeResult> resultType, Double[] tuple) {
+        this.resultType = resultType;
         this.tuple = tuple;
     }
 
-    /*
-    public boolean getResultValue() {
-        return resultValue;
-    }*/
-
-    public double getResultValue() {
-        return resultValue ? 0 : 1;
+    public Class<? extends ITreeResult> getResultType() {
+        return resultType;
     }
 
     public Double[] getTuple() {
         return tuple;
+    }
+
+    public ITreeResult createInstance() {
+        try {
+            return resultType.newInstance();
+        } catch (Exception e) {
+            throw new RuntimeException("Unable to instanciate a new instance of the tree output value", e);
+        }
     }
 }

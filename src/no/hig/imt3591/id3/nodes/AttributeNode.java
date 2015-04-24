@@ -1,5 +1,6 @@
 package no.hig.imt3591.id3.nodes;
 
+import no.hig.imt3591.id3.ITreeResult;
 import no.hig.imt3591.id3.Observation;
 
 /**
@@ -18,7 +19,7 @@ public class AttributeNode {
         return visitor == value;
     }
 
-    public boolean visit(Observation set) {
+    public ITreeResult visit(Observation set) {
         return next.search(set);
     }
 

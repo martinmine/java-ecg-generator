@@ -1,26 +1,23 @@
 package no.hig.imt3591.id3;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Entropy helper class for a set.
  */
 public class Entropy {
-    private int positives;
-    private int negatives;
+    private Map<Class<? extends ITreeResult>, Integer> count = new HashMap<>();
+    private int totalSetCount;
 
     /**
      * Finds entropy for a set.
      * @param set Set to find attribute for.
-     * @param comparator The value in the set that determines true/false.
      */
-    public Entropy (List<Observation> set, double comparator) {
+    public Entropy (List<Observation> set) {
         for (Observation observation : set) {
-            if (observation.getResultValue() == comparator) {
-                positives++;
-            } else {
-                negatives++;
-            }
+            addCount(observation.getResultType());
         }
     }
 
@@ -29,15 +26,10 @@ public class Entropy {
      * @param set The parent set.
      * @param attributes The attribute that a condition has to be met on,
      * @param value The value that has to be equal on the test attribute.
-     * @param comparator The value in the set that determines true/false.
      */
-    public Entropy (List<Observation> set, int attributes, double value, double comparator) {
+    public Entropy (List<Observation> set, int attributes, double value) {
         set.stream().filter(observation -> observation.getTuple()[attributes].equals(value)).forEach(observation -> {
-            if (observation.getResultValue() == comparator) {
-                positives++;
-            } else {
-                negatives++;
-            }
+            addCount(observation.getResultType());
         });
     }
 
@@ -51,20 +43,30 @@ public class Entropy {
         }
     }
 
-    public static EntropySet filterByThreshold(List<Observation> set, int attributeIndex, double comparator, double threshold) {
+    public static EntropySet filterByThreshold(List<Observation> set, int attributeIndex, double threshold) {
         EntropySet entropy = new EntropySet();
 
         for (Observation observation : set) {
             Entropy comparing = observation.getTuple()[attributeIndex] <= threshold ? entropy.left : entropy.right;
-
-            if (observation.getResultValue() == comparator) {
-                comparing.positives++;
-            } else {
-                comparing.negatives++;
-            }
+            comparing.addCount(observation.getResultType());
         }
 
         return entropy;
+    }
+
+    private void addCount(Class<? extends ITreeResult> resultType) {
+        totalSetCount++;
+        if (count.containsKey(resultType)) {
+            // increment
+            int newCount = count.get(resultType) + 1;
+            count.remove(resultType);
+            count.put(resultType, newCount);
+
+        } else {
+            count.put(resultType, 1);
+        }
+
+        // TODO: Move newCount outside
     }
 
     private Entropy() {
@@ -75,15 +77,28 @@ public class Entropy {
      * @return Amount of bits required to represent an attribute, eg. 0 means the set is pure, 1 means there is high uncertainty.
      */
     public double getEntropy() {
+        double entropy = 0;
+        if (count.size() == 1) {
+            return entropy;
+        }
+
+        for (int typeCount : count.values()) {
+            entropy -= (typeCount / getEntropySize()) * (Math.log(typeCount / getEntropySize())) / Math.log(2);
+        }
+
+        /*
         if (negatives == 0 || positives == 0) {
             return 0;
         }
 
         return - (positives / (double)(positives + negatives)) * (Math.log(positives / (double)(positives + negatives)) / Math.log(2))
-                - (negatives / (double)(positives + negatives)) * (Math.log(negatives / (double)(positives + negatives)) / Math.log(2));
+                - (negatives / (double)(positives + negatives)) * (Math.log(negatives / (double)(positives + negatives)) / Math.log(2));*/
+
+
+        return entropy;
     }
 
     public double getEntropySize() {
-        return (double) positives + negatives;
+        return totalSetCount;
     }
 }

@@ -8,21 +8,34 @@ import java.util.List;
 public class ID3TestClass {
     private static List<Observation> observations = new LinkedList<>();
 
+    public static class TrueOutputValue implements ITreeResult {
+        @Override
+        public void invoke() {
+        }
+    }
+
+    public static class FalseOutputValue implements ITreeResult {
+        @Override
+        public void invoke() {
+        }
+    }
+
+
     public static void main(String[] args) {
-        observations.add(new Observation(false, new Double[]{0d, 0d, 0d, 10d})); //D1
-        observations.add(new Observation(false, new Double[]{0d, 0d, 1d, 7d}));  //D2
-        observations.add(new Observation(true ,new Double[]{1d, 0d, 0d, 6d}));  //D3
-        observations.add(new Observation(true ,new Double[]{2d, 0d, 0d, 4d}));  //D4
-        observations.add(new Observation(true ,new Double[]{2d, 1d, 0d, 9d}));  //D5
-        observations.add(new Observation(false ,new Double[]{2d, 1d, 1d, 8d}));  //D6
-        observations.add(new Observation(true ,new Double[]{1d, 1d, 1d, 2d}));  //D7
-        observations.add(new Observation(false ,new Double[]{0d, 0d, 0d, 10d})); //D8
-        observations.add(new Observation(true ,new Double[]{0d, 1d, 0d, 5d}));  //D9
-        observations.add(new Observation(true ,new Double[]{2d, 1d, 0d, 5d}));  //D10
-        observations.add(new Observation(true ,new Double[]{0d, 1d, 1d, 5d}));  //D11
-        observations.add(new Observation(true ,new Double[]{1d, 0d, 1d, 5d}));  //D12
-        observations.add(new Observation(true ,new Double[]{1d, 1d, 0d, 5d}));  //D13
-        observations.add(new Observation(false ,new Double[]{2d, 0d, 1d, 10d})); //D14
+        observations.add(new Observation(FalseOutputValue.class, new Double[]{0d, 0d, 0d, 10d})); //D1
+        observations.add(new Observation(FalseOutputValue.class, new Double[]{0d, 0d, 1d, 7d}));  //D2
+        observations.add(new Observation(TrueOutputValue.class, new Double[]{1d, 0d, 0d, 6d}));  //D3
+        observations.add(new Observation(TrueOutputValue.class, new Double[]{2d, 0d, 0d, 4d}));  //D4
+        observations.add(new Observation(TrueOutputValue.class, new Double[]{2d, 1d, 0d, 9d}));  //D5
+        observations.add(new Observation(FalseOutputValue.class, new Double[]{2d, 1d, 1d, 8d}));  //D6
+        observations.add(new Observation(TrueOutputValue.class, new Double[]{1d, 1d, 1d, 2d}));  //D7
+        observations.add(new Observation(FalseOutputValue.class, new Double[]{0d, 0d, 0d, 10d})); //D8
+        observations.add(new Observation(TrueOutputValue.class, new Double[]{0d, 1d, 0d, 5d}));  //D9
+        observations.add(new Observation(TrueOutputValue.class, new Double[]{2d, 1d, 0d, 5d}));  //D10
+        observations.add(new Observation(TrueOutputValue.class, new Double[]{0d, 1d, 1d, 5d}));  //D11
+        observations.add(new Observation(TrueOutputValue.class, new Double[]{1d, 0d, 1d, 5d}));  //D12
+        observations.add(new Observation(TrueOutputValue.class, new Double[]{1d, 1d, 0d, 5d}));  //D13
+        observations.add(new Observation(FalseOutputValue.class, new Double[]{2d, 0d, 1d, 10d})); //D14
 
         IAttributeNameProvider nameProvider = i -> {
                 switch (i) {
@@ -49,13 +62,12 @@ public class ID3TestClass {
             }
         };
 
-        DecisionTree tree = new DecisionTree(observations, 4, 1, nameProvider, metadataProvider);
+        DecisionTree tree = new DecisionTree(observations, 4, nameProvider, metadataProvider);
 
         boolean failed = false;
         for (Observation observation : observations) {
-            boolean result = tree.search(observation);
-            boolean outputResult = (observation.getResultValue() == 1);
-            if (result != outputResult) {
+            ITreeResult result = tree.search(observation);
+            if (!result.getClass().equals(observation.getResultType())) {
                 failed = true;
                 System.out.println("Test failed on set " + Arrays.toString(observation.getTuple()));
             } else {
