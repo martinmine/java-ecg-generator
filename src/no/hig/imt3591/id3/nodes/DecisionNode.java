@@ -11,10 +11,10 @@ import java.util.List;
  * Contains information about which attribute to test against and references to its children.
  */
 public class DecisionNode {
-    private int attribute;
-    private List<AttributeNode> children;
+    private final int attribute;
+    private final List<AttributeNode> children;
 
-    public DecisionNode(int attribute) {
+    public DecisionNode(final int attribute) {
         this.attribute = attribute;
         this.children = new LinkedList<>();
     }
@@ -23,7 +23,7 @@ public class DecisionNode {
      * Adds a child to the node.
      * @param child New child.
      */
-    public void addChild(AttributeNode child) {
+    public void addChild(final AttributeNode child) {
         this.children.add(child);
     }
 
@@ -32,8 +32,8 @@ public class DecisionNode {
      * @param set Tuple to test against.
      * @return Node test output, the decision in the decision tree.
      */
-    public ITreeResult search(Observation set) {
-        for (AttributeNode attributeNode : children) {
+    public ITreeResult search(final Observation set) {
+        for (final AttributeNode attributeNode : children) {
             if (attributeNode.canVisit(set.getTuple()[attribute])) {
                 return attributeNode.visit(set);
             }

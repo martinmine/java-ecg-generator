@@ -10,16 +10,16 @@ public class AttributeNode {
     private double value;
     private DecisionNode next;
 
-    public AttributeNode(double value, DecisionNode next) {
+    public AttributeNode(final double value, final DecisionNode next) {
         this.value = value;
         this.next = next;
     }
 
-    public boolean canVisit(double visitor) {
+    public boolean canVisit(final double visitor) {
         return visitor == value;
     }
 
-    public ITreeResult visit(Observation set) {
+    public ITreeResult visit(final Observation set) {
         return next.search(set);
     }
 

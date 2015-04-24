@@ -8,15 +8,15 @@ import java.util.Map;
  * Entropy helper class for a set.
  */
 public class Entropy {
-    private Map<Class<? extends ITreeResult>, Integer> count = new HashMap<>();
+    private final Map<Class<? extends ITreeResult>, Integer> count = new HashMap<>();
     private int totalSetCount;
 
     /**
      * Finds entropy for a set.
      * @param set Set to find attribute for.
      */
-    public Entropy (List<Observation> set) {
-        for (Observation observation : set) {
+    public Entropy (final List<Observation> set) {
+        for (final Observation observation : set) {
             addCount(observation.getResultType());
         }
     }
@@ -27,15 +27,15 @@ public class Entropy {
      * @param attributes The attribute that a condition has to be met on,
      * @param value The value that has to be equal on the test attribute.
      */
-    public Entropy (List<Observation> set, int attributes, double value) {
+    public Entropy (final List<Observation> set, final int attributes, final double value) {
         set.stream().filter(observation -> observation.getTuple()[attributes].equals(value)).forEach(observation -> {
             addCount(observation.getResultType());
         });
     }
 
     public static class EntropySet {
-        Entropy left;
-        Entropy right;
+        final Entropy left;
+        final Entropy right;
 
         private EntropySet() {
             this.left = new Entropy();
@@ -43,30 +43,26 @@ public class Entropy {
         }
     }
 
-    public static EntropySet filterByThreshold(List<Observation> set, int attributeIndex, double threshold) {
-        EntropySet entropy = new EntropySet();
+    public static EntropySet filterByThreshold(final List<Observation> set, final int attributeIndex, final double threshold) {
+        final EntropySet entropy = new EntropySet();
 
-        for (Observation observation : set) {
-            Entropy comparing = observation.getTuple()[attributeIndex] <= threshold ? entropy.left : entropy.right;
+        for (final Observation observation : set) {
+            final Entropy comparing = observation.getTuple()[attributeIndex] <= threshold ? entropy.left : entropy.right;
             comparing.addCount(observation.getResultType());
         }
 
         return entropy;
     }
 
-    private void addCount(Class<? extends ITreeResult> resultType) {
+    private void addCount(final Class<? extends ITreeResult> resultType) {
         totalSetCount++;
-        if (count.containsKey(resultType)) {
-            // increment
-            int newCount = count.get(resultType) + 1;
-            count.remove(resultType);
-            count.put(resultType, newCount);
+        int occurrence = 1;
 
-        } else {
-            count.put(resultType, 1);
+        if (count.containsKey(resultType)) {
+            occurrence = count.get(resultType) + 1;
         }
 
-        // TODO: Move newCount outside
+        count.put(resultType, occurrence);
     }
 
     private Entropy() {
@@ -85,15 +81,6 @@ public class Entropy {
         for (int typeCount : count.values()) {
             entropy -= (typeCount / getEntropySize()) * (Math.log(typeCount / getEntropySize())) / Math.log(2);
         }
-
-        /*
-        if (negatives == 0 || positives == 0) {
-            return 0;
-        }
-
-        return - (positives / (double)(positives + negatives)) * (Math.log(positives / (double)(positives + negatives)) / Math.log(2))
-                - (negatives / (double)(positives + negatives)) * (Math.log(negatives / (double)(positives + negatives)) / Math.log(2));*/
-
 
         return entropy;
     }

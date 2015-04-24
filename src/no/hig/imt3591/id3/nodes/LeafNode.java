@@ -7,15 +7,15 @@ import no.hig.imt3591.id3.Observation;
  * Terminal node of the tree.
  */
 public class LeafNode extends AttributeNode {
-    private ITreeResult endValue;
+    private final ITreeResult endValue;
 
-    public LeafNode(double value, ITreeResult endValue) {
+    public LeafNode(final double value, final ITreeResult endValue) {
         super(value, null);
         this.endValue = endValue;
     }
 
     @Override
-    public ITreeResult visit(Observation set) {
+    public ITreeResult visit(final Observation set) {
         return endValue;
     }
 }
