@@ -1,5 +1,7 @@
 package no.hig.imt3591.id3.nodes;
 
+import no.hig.imt3591.id3.Observation;
+
 /**
  * Terminal node of the tree.
  */
@@ -12,7 +14,7 @@ public class LeafNode extends AttributeNode {
     }
 
     @Override
-    public boolean visit(double[] set) {
+    public boolean visit(Observation set) {
         return endValue;
     }
 }

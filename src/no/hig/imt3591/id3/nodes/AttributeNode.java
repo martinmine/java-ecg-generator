@@ -1,5 +1,7 @@
 package no.hig.imt3591.id3.nodes;
 
+import no.hig.imt3591.id3.Observation;
+
 /**
  * Concrete test on an categorical attributes.
  */
@@ -16,7 +18,7 @@ public class AttributeNode {
         return visitor == value;
     }
 
-    public boolean visit(double[] set) {
+    public boolean visit(Observation set) {
         return next.search(set);
     }
 

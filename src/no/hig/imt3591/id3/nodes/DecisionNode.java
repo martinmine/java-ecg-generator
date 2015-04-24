@@ -1,5 +1,7 @@
 package no.hig.imt3591.id3.nodes;
 
+import no.hig.imt3591.id3.Observation;
+
 import java.util.LinkedList;
 import java.util.List;
 
@@ -29,9 +31,9 @@ public class DecisionNode {
      * @param set Tuple to test against.
      * @return Node test output, the decision in the decision tree.
      */
-    public boolean search(double[] set) {
+    public boolean search(Observation set) {
         for (AttributeNode attributeNode : children) {
-            if (attributeNode.canVisit(set[attribute])) {
+            if (attributeNode.canVisit(set.getTuple()[attribute])) {
                 return attributeNode.visit(set);
             }
         }

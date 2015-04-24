@@ -13,11 +13,10 @@ public class Entropy {
      * Finds entropy for a set.
      * @param set Set to find attribute for.
      * @param comparator The value in the set that determines true/false.
-     * @param comparatorIndex Index of the comparator.
      */
-    public Entropy (List<Double[]> set, double comparator, int comparatorIndex) {
-        for (Double[] observation : set) {
-            if (observation[comparatorIndex].equals(comparator)) {
+    public Entropy (List<Observation> set, double comparator) {
+        for (Observation observation : set) {
+            if (observation.getResultValue() == comparator) {
                 positives++;
             } else {
                 negatives++;
@@ -31,11 +30,10 @@ public class Entropy {
      * @param attributes The attribute that a condition has to be met on,
      * @param value The value that has to be equal on the test attribute.
      * @param comparator The value in the set that determines true/false.
-     * @param comparatorIndex Index of the comparator.
      */
-    public Entropy (List<Double[]> set, int attributes, double value, double comparator, int comparatorIndex) {
-        set.stream().filter(observation -> observation[attributes].equals(value)).forEach(observation -> {
-            if (observation[comparatorIndex].equals(comparator)) {
+    public Entropy (List<Observation> set, int attributes, double value, double comparator) {
+        set.stream().filter(observation -> observation.getTuple()[attributes].equals(value)).forEach(observation -> {
+            if (observation.getResultValue() == comparator) {
                 positives++;
             } else {
                 negatives++;
@@ -51,20 +49,15 @@ public class Entropy {
             this.left = new Entropy();
             this.right = new Entropy();
         }
-
-        public double getAverage() {
-            return (left.getEntropy() + right.getEntropy()) / 2;
-        }
     }
 
-    public static EntropySet filterByThreshold(List<Double[]> set, int attributeIndex, double comparator, int comparatorIndex, double threshold) {
-
+    public static EntropySet filterByThreshold(List<Observation> set, int attributeIndex, double comparator, double threshold) {
         EntropySet entropy = new EntropySet();
 
-        for (Double[] observation : set) {
-            Entropy comparing = observation[attributeIndex] <= threshold ? entropy.left : entropy.right;
+        for (Observation observation : set) {
+            Entropy comparing = observation.getTuple()[attributeIndex] <= threshold ? entropy.left : entropy.right;
 
-            if (observation[comparatorIndex].equals(comparator)) {
+            if (observation.getResultValue() == comparator) {
                 comparing.positives++;
             } else {
                 comparing.negatives++;
