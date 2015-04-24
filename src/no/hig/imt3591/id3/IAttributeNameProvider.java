@@ -9,5 +9,5 @@ public interface IAttributeNameProvider {
      * @param i Index of the attribute.
      * @return The different categories.
      */
-    Integer[] getAttributeValues(int i);
+    Double[] getAttributeValues(int i);
 }

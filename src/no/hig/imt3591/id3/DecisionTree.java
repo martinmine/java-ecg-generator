@@ -14,7 +14,7 @@ public class DecisionTree {
     private DecisionNode root;
     private int fields;
     private int comparatorIndex;
-    private Integer comparator;
+    private double comparator;
     private IAttributeNameProvider nameProvider;
     private IAttributeMetadataProvider metadataProvider;
 
@@ -27,7 +27,7 @@ public class DecisionTree {
      * @param nameProvider Provides values for attributes that is not continuous.
      * @param metadataProvider Provides metadata about each attribute.
      */
-    public DecisionTree(List<Integer[]> set, int fields, Integer comparator,
+    public DecisionTree(List<Double[]> set, int fields, double comparator,
                         IAttributeNameProvider nameProvider, IAttributeMetadataProvider metadataProvider) {
         this.fields = fields;
         this.comparator = comparator;
@@ -42,7 +42,7 @@ public class DecisionTree {
      * @param tuple The data that will be tested against the tree.
      * @return The output value of the data-set.
      */
-    public boolean search(int[] tuple) {
+    public boolean search(double[] tuple) {
         return root.search(tuple);
     }
 
@@ -54,12 +54,12 @@ public class DecisionTree {
      * @param closedList Attributes that has been plotted in the tree.
      * @return New node in the tree with its children
      */
-    private DecisionNode split(List<Integer[]> set, List<Integer> closedList) {
+    private DecisionNode split(List<Double[]> set, List<Integer> closedList) {
         double lowestGain = 0;
         int lowestGainField = 0;
         Entropy setEntropy = new Entropy(set, comparator, comparatorIndex);
         int setSize = set.size();
-        int threshold = 0;
+        double threshold = 0;
 
         /**
          * Find the node with the highest overall gain
@@ -70,8 +70,8 @@ public class DecisionTree {
                 double subsetEntropy = setEntropy.getEntropy();
 
                 if (fieldType == IAttributeMetadataProvider.CATEGORICAL) {
-                    Integer[] fieldValues = nameProvider.getAttributeValues(i);
-                    for (Integer fieldValue : fieldValues) {
+                    Double[] fieldValues = nameProvider.getAttributeValues(i);
+                    for (double fieldValue : fieldValues) {
                         Entropy fieldEntropy = new Entropy(set, i, fieldValue, comparator, comparatorIndex);
                         subsetEntropy -= getInformationGain(fieldEntropy, setSize);
                     }
@@ -97,8 +97,8 @@ public class DecisionTree {
          */
         int attributeType = metadataProvider.getAttributeType(lowestGainField);
         if (attributeType == IAttributeMetadataProvider.CATEGORICAL) {
-            for (Integer name : nameProvider.getAttributeValues(lowestGainField)) {
-                List<Integer[]> subset = filterSet(set, lowestGainField, name);
+            for (double name : nameProvider.getAttributeValues(lowestGainField)) {
+                List<Double[]> subset = filterSet(set, lowestGainField, name);
                 Entropy trueFalseSubsetCount = new Entropy(subset, comparator, comparatorIndex);
 
                 if (trueFalseSubsetCount.getEntropy() == 0) {
@@ -108,11 +108,11 @@ public class DecisionTree {
                 }
             }
         } else if (attributeType == IAttributeMetadataProvider.CONTINUOUS){
-            List<Integer[]> subsetA = new LinkedList<>();
-            List<Integer[]> subsetB = new LinkedList<>();
+            List<Double[]> subsetA = new LinkedList<>();
+            List<Double[]> subsetB = new LinkedList<>();
 
             // Filter at threshold
-            for (Integer[] observation : set) {
+            for (Double[] observation : set) {
                 (observation[lowestGainField] <= threshold ? subsetA : subsetB).add(observation);
             }
 
@@ -142,12 +142,12 @@ public class DecisionTree {
      * @param index The index of the attribute that will be.
      * @return The threshold value that gives the most information gain.
      */
-    private int findLowestSplit(List<Integer[]> set, int index) {
+    private double findLowestSplit(List<Double[]> set, int index) {
         double lowestEntropy = 1;
-        int lowestThreshold = 0;
+        double lowestThreshold = 0;
 
         for (int i = 1; i < set.size(); i++) {
-            int threshold = set.get(i)[index];
+            double threshold = set.get(i)[index];
             Entropy.EntropySet entropy = Entropy.filterByThreshold(set, index, this.comparator, comparatorIndex, threshold);
 
             double subsetEntropy = (entropy.left.getEntropy() + entropy.right.getEntropy()) / 2;
@@ -178,7 +178,7 @@ public class DecisionTree {
      * @param condition The value that has to be equals to in the attribute.
      * @return Subset of set.
      */
-    private List<Integer[]> filterSet(List<Integer[]> set, int field, Integer condition) {
+    private List<Double[]> filterSet(List<Double[]> set, int field, double condition) {
         return set.stream().filter(observation -> observation[field].equals(condition)).collect(Collectors.toCollection(LinkedList::new));
     }
 }

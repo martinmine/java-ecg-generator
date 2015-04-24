@@ -29,7 +29,7 @@ public class DecisionNode {
      * @param set Tuple to test against.
      * @return Node test output, the decision in the decision tree.
      */
-    public boolean search(int[] set) {
+    public boolean search(double[] set) {
         for (AttributeNode attributeNode : children) {
             if (attributeNode.canVisit(set[attribute])) {
                 return attributeNode.visit(set);
