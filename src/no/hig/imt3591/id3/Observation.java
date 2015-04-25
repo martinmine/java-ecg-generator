@@ -1,20 +1,22 @@
 package no.hig.imt3591.id3;
 
+import java.lang.reflect.Field;
+
 /**
  * Contains information about one observation/tuple that is fed to the decision tree.
  */
-public class Observation {
+public class Observation<T> {
     private final Class<? extends ITreeResult> resultType;
-    private final Double[] tuple;
+    private final T observationData;
 
     /**
      * Creates a new observation.
      * @param resultType The type of the action that should be invoked for this observation.
-     * @param tuple Observation data.
+     * @param observationData Contains information about the observation.
      */
-    public Observation(Class<? extends ITreeResult> resultType, Double[] tuple) {
+    public Observation(Class<? extends ITreeResult> resultType, T observationData) {
         this.resultType = resultType;
-        this.tuple = tuple;
+        this.observationData = observationData;
     }
 
     /**
@@ -26,11 +28,17 @@ public class Observation {
 
     /**
      * Gets the observation value for a given attribute.
-     * @param index Index of the observation value (attribute index).
+     * @param field The attribute/field we want information from.
      * @return Observation value.
      */
-    public double getObservationValue(int index) {
-        return tuple[index];
+    public double getObservationValue(Field field) {
+        field.setAccessible(true);
+
+        try {
+            return (Double) field.get(observationData);
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException("Setting the field accessible failed", e);
+        }
     }
 
     /**

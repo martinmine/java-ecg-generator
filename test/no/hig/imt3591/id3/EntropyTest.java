@@ -10,8 +10,8 @@ import static org.junit.Assert.*;
 public class EntropyTest {
     @Test
     public void testEmptySet() {
-        List<Observation> observations = new LinkedList<>();
-        Entropy entropy = new Entropy(observations);
+        List<Observation<Object>> observations = new LinkedList<>();
+        Entropy<Object> entropy = new Entropy<>(observations);
         assertEquals(0, entropy.getEntropy(), 0);
     }
 }
