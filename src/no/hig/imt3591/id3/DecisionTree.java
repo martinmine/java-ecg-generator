@@ -12,9 +12,9 @@ import java.util.stream.Collectors;
  */
 public class DecisionTree {
     private final DecisionNode root;
-    private final int fields;
     private final IAttributeNameProvider nameProvider;
     private final IAttributeMetadataProvider metadataProvider;
+    private final int fields;
 
     /**
      * Creates a new decision tree using the ID3 algorithm.
@@ -57,27 +57,26 @@ public class DecisionTree {
         double threshold = 0;
 
         /**
-         * Find the node with the highest overall gain
+         * Find the attribute with the highest overall information gain
          */
         for (int i = 0; i < fields; i++) {
             final int fieldType = metadataProvider.getAttributeType(i);
-            double subsetEntropy = setEntropy.getEntropy();
+            double subsetGain = setEntropy.getEntropy();
 
             if (fieldType == IAttributeMetadataProvider.CATEGORICAL) {
-                Double[] fieldValues = nameProvider.getAttributeValues(i);
-                for (double fieldValue : fieldValues) {
+                for (double fieldValue : nameProvider.getAttributeValues(i)) {
                     Entropy fieldEntropy = new Entropy(set, i, fieldValue);
-                    subsetEntropy -= getInformationGain(fieldEntropy, setSize);
+                    subsetGain -= fieldEntropy.getInformationGain(setSize);
                 }
             } else if (fieldType == IAttributeMetadataProvider.CONTINUOUS) {
                 threshold = findLowestThreshold(set, i);
                 Entropy.EntropySet setSplit = Entropy.splitAtThreshold(set, i, threshold);
-                subsetEntropy -= getInformationGain(setSplit.left, setSize);
-                subsetEntropy -= getInformationGain(setSplit.right, setSize);
+                subsetGain -= setSplit.left.getInformationGain(setSize);
+                subsetGain -= setSplit.right.getInformationGain(setSize);
             }
 
-            if (subsetEntropy > highestGain) {
-                highestGain = subsetEntropy;
+            if (subsetGain > highestGain) {
+                highestGain = subsetGain;
                 highestGainField = i;
             }
         }
@@ -85,7 +84,7 @@ public class DecisionTree {
         final DecisionNode node = new DecisionNode(highestGainField);
 
         /**
-         * Then we expand the values for the node with the lowest entropy/highest information gain
+         * Then we expand the values for the attribute with the lowest entropy/highest information gain
          */
         final int attributeType = metadataProvider.getAttributeType(highestGainField);
         if (attributeType == IAttributeMetadataProvider.CATEGORICAL) {
@@ -103,25 +102,21 @@ public class DecisionTree {
             final List<Observation> subsetA = new LinkedList<>();
             final List<Observation> subsetB = new LinkedList<>();
 
-            // Filter at threshold
+            // Split set at threshold
             for (final Observation observation : set) {
                 (observation.getObservationValue(highestGainField) <= threshold ? subsetA : subsetB).add(observation);
             }
 
-            if (subsetA.size() > 0) {
-                if (new Entropy(subsetA).getEntropy() == 0) {
-                    node.addChild(new AlphaLeafNode(threshold, subsetA.get(0).createInstance()));
-                } else {
-                    node.addChild(new AlphaAttributeNode(threshold, split(subsetA)));
-                }
+            if (new Entropy(subsetA).getEntropy() == 0) {
+                node.addChild(new AlphaLeafNode(threshold, subsetA.get(0).createInstance()));
+            } else {
+                node.addChild(new AlphaAttributeNode(threshold, split(subsetA)));
             }
 
-            if (subsetB.size() > 0) {
-                if (new Entropy(subsetB).getEntropy() == 0) {
-                    node.addChild(new BetaLeafNode(threshold, subsetB.get(0).createInstance()));
-                } else {
-                    node.addChild(new BetaAttributeNode(threshold, split(subsetB)));
-                }
+            if (new Entropy(subsetB).getEntropy() == 0) {
+                node.addChild(new BetaLeafNode(threshold, subsetB.get(0).createInstance()));
+            } else {
+                node.addChild(new BetaAttributeNode(threshold, split(subsetB)));
             }
         }
 
@@ -138,11 +133,9 @@ public class DecisionTree {
         double lowestEntropy = 1;
         double lowestThreshold = 0;
 
-        for (int i = 1; i < set.size(); i++) {
-            final double threshold = set.get(i).getObservationValue(index);
-            final Entropy.EntropySet entropy = Entropy.splitAtThreshold(set, index, threshold);
-
-            final double subsetEntropy = (entropy.left.getEntropy() + entropy.right.getEntropy()) / 2;
+        for (final Observation observation : set) {
+            final double threshold = observation.getObservationValue(index);
+            final double subsetEntropy = Entropy.findEntropyAtThreshold(set, index, threshold);
 
             if (lowestEntropy > subsetEntropy) {
                 lowestThreshold = threshold;
@@ -151,16 +144,6 @@ public class DecisionTree {
         }
 
         return lowestThreshold;
-    }
-
-    /**
-     * Calculates information gain from one set,
-     * @param entropy The entropy from the set.
-     * @param superSetSize The size of the parent set.
-     * @return Information gain.
-     */
-    private double getInformationGain(final Entropy entropy, final double superSetSize) {
-        return entropy.getEntropySize() / superSetSize * entropy.getEntropy();
     }
 
     /**

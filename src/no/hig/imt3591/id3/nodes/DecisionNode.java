@@ -8,14 +8,18 @@ import java.util.List;
 
 /**
  * Node that will make a decision and has a set of children with their conditions.
- * Contains information about which attribute to test against and references to its children.
+ * Contains information about which attributeIndex to test against and references to its children.
  */
 public class DecisionNode {
-    private final int attribute;
+    private final int attributeIndex;
     private final List<AttributeNode> children;
 
-    public DecisionNode(final int attribute) {
-        this.attribute = attribute;
+    /**
+     * Creates a new decision node.
+     * @param attributeIndex Index of the attribute that this node is for.
+     */
+    public DecisionNode(final int attributeIndex) {
+        this.attributeIndex = attributeIndex;
         this.children = new LinkedList<>();
     }
 
@@ -34,11 +38,12 @@ public class DecisionNode {
      */
     public ITreeResult search(final Observation set) {
         for (final AttributeNode attributeNode : children) {
-            if (attributeNode.canVisit(set.getObservationValue(attribute))) {
+            if (attributeNode.canVisit(set.getObservationValue(attributeIndex))) {
                 return attributeNode.visit(set);
             }
         }
 
+        // TODO: Handle this, could throw exception
         return null;
     }
 }

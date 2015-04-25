@@ -16,9 +16,7 @@ public class Entropy {
      * @param set Set to find attribute for.
      */
     public Entropy (final List<Observation> set) {
-        for (final Observation observation : set) {
-            addCount(observation.getResultType());
-        }
+        set.stream().forEach(o -> addCount(o.getResultType()));
     }
 
     /**
@@ -29,8 +27,11 @@ public class Entropy {
      */
     public Entropy (final List<Observation> set, final int attributes, final double value) {
         set.stream()
-                .filter(observation -> observation.getObservationValue(attributes) == (value))
+                .filter(observation -> observation.getObservationValue(attributes) == value)
                 .forEach(observation -> addCount(observation.getResultType()));
+    }
+
+    private Entropy() {
     }
 
     public static class EntropySet {
@@ -44,28 +45,24 @@ public class Entropy {
     }
 
     public static EntropySet splitAtThreshold(final List<Observation> set, final int attributeIndex, final double threshold) {
-        final EntropySet entropy = new EntropySet();
+        final EntropySet entropySet = new EntropySet();
 
         for (final Observation observation : set) {
-            final Entropy comparing = observation.getObservationValue(attributeIndex) <= threshold ? entropy.left : entropy.right;
-            comparing.addCount(observation.getResultType());
+            (observation.getObservationValue(attributeIndex) <= threshold ? entropySet.left : entropySet.right)
+                    .addCount(observation.getResultType());
         }
 
-        return entropy;
+        return entropySet;
+    }
+
+    public static double findEntropyAtThreshold(final List<Observation> set, final int attributeIndex, final double threshold) {
+        final Entropy.EntropySet entropy = Entropy.splitAtThreshold(set, attributeIndex, threshold);
+        return (entropy.left.getEntropy() + entropy.right.getEntropy()) / 2;
     }
 
     private void addCount(final Class<? extends ITreeResult> resultType) {
-        totalSetCount++;
-        int occurrence = 1;
-
-        if (count.containsKey(resultType)) {
-            occurrence = count.get(resultType) + 1;
-        }
-
-        count.put(resultType, occurrence);
-    }
-
-    private Entropy() {
+        count.put(resultType, count.getOrDefault(resultType, 0) + 1);
+        ++totalSetCount;
     }
 
     /**
@@ -74,9 +71,6 @@ public class Entropy {
      */
     public double getEntropy() {
         double entropy = 0;
-        if (count.size() == 1) {
-            return entropy;
-        }
 
         for (int typeCount : count.values()) {
             entropy -= (typeCount / getEntropySize()) * (Math.log(typeCount / getEntropySize())) / Math.log(2);
@@ -85,7 +79,16 @@ public class Entropy {
         return entropy;
     }
 
-    public double getEntropySize() {
+    private double getEntropySize() {
         return totalSetCount;
+    }
+
+    /**
+     * Calculates information gain from one set,
+     * @param superSetSize The size of the parent set.
+     * @return Information gain.
+     */
+    public double getInformationGain(final double superSetSize) {
+        return getEntropySize() / superSetSize * getEntropy();
     }
 }
