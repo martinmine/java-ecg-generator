@@ -45,7 +45,8 @@ public class Entropy<T> {
         }
     }
 
-    public static <T> EntropySet splitAtThreshold(final List<Observation<T>> set, final Field field, final double threshold) {
+    public static <T> EntropySet splitAtThreshold(final List<Observation<T>> set,
+                                                  final Field field, final double threshold) {
         final EntropySet entropySet = new EntropySet();
 
         for (final Observation<T> observation : set) {
@@ -56,7 +57,8 @@ public class Entropy<T> {
         return entropySet;
     }
 
-    public static <T> double findEntropyAtThreshold(final List<Observation<T>> set, final Field field, final double threshold) {
+    public static <T> double findEntropyAtThreshold(final List<Observation<T>> set,
+                                                    final Field field, final double threshold) {
         final Entropy.EntropySet entropy = Entropy.splitAtThreshold(set, field, threshold);
         return (entropy.left.getEntropy() + entropy.right.getEntropy()) / 2;
     }
@@ -68,7 +70,8 @@ public class Entropy<T> {
 
     /**
      * Gets the entropy value, or the amount of bits that is required to represent an entity.
-     * @return Amount of bits required to represent an attribute, eg. 0 means the set is pure, 1 means there is high uncertainty.
+     * @return Amount of bits required to represent an attribute, eg. 0 means the set is pure,
+     *         1 means there is high uncertainty.
      */
     public double getEntropy() {
         double entropy = 0;
