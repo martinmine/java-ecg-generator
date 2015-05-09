@@ -83,6 +83,8 @@ public class MainApplication extends javax.swing.JFrame {
 
         add(toolPanel, BorderLayout.SOUTH);
         add(plotWin, BorderLayout.CENTER);
+
+
     }
 
     /**

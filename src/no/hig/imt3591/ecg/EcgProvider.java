@@ -17,4 +17,8 @@ public interface EcgProvider {
     public int getFrameAmplitude();
     public double getAmplitude();
     public double getPlotZoom();
+    public boolean getPeakDetectionMethod();
+    public double getSAtemperature();
+    public double getSAcoolDownRate();
+    public int getObservationLimit();
 }
