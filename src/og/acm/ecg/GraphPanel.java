@@ -14,42 +14,45 @@ import no.hig.imt3591.ecg.PullService;
 import no.hig.imt3591.ecg.QRSDetector;
 
 import javax.swing.*;
-import javax.swing.border.BevelBorder;
-import javax.swing.border.EtchedBorder;
-import javax.swing.border.TitledBorder;
+import javax.swing.border.*;
+import javax.swing.plaf.ButtonUI;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.AdjustmentEvent;
 import java.awt.event.AdjustmentListener;
+import java.text.FieldPosition;
+import java.text.Format;
+import java.text.NumberFormat;
+import java.text.ParsePosition;
 import java.util.Timer;
 import java.util.TimerTask;
 
 public class GraphPanel extends JPanel implements AdjustmentListener, EcgProvider {
 
     /**
-     * These constants used in drawText() method for placement 
+     * These constants used in drawText() method for placement
      * of the text within a given rectangular area.
      */
     private static final int CENTER = 0;
     private static final int LEFT = 1;
     private static final int RIGHT = 2;
-    
+
     /**
      * Frame Dimensions.
      */
     private final int posFrameY = 1;
     private final int frameHeight = 290;
     private final int frameAmplitude = frameHeight / 2;
-    
+
     //Coordinates Origin
     private final int posOriginY = posFrameY + (frameHeight / 2);
-    
+
     //X coordinates
     private final int horizontalScaleY = posFrameY + frameHeight;
     private final int horizontalScaleWidth = 100;
     private final int horizontalScaleHeight = 20;
     private final int fScaleNumSize = 9;
-    
+
     /**
      * Colors for the Plotting Components
      */
@@ -57,7 +60,7 @@ public class GraphPanel extends JPanel implements AdjustmentListener, EcgProvide
     private final Color frameLineColor = Color.BLACK;
     private final Color frameInsideLineColor = Color.LIGHT_GRAY;
     private final Color axesNumColor = Color.GRAY;
-    
+
     /**
      * Limit below which scale values use decimal format,
      * above which they use scientific format.
@@ -110,18 +113,16 @@ public class GraphPanel extends JPanel implements AdjustmentListener, EcgProvide
     private DefaultTableModel tableValuesModel;
     private ECGPanel ecgFrame;
 
-
-    /* TEST data (THOMAS) */
-    private QRSDetector pk;
-    private int numMeasurements;
-    private int lastLastPointX;
-    private double total = 0;
-    private double stdDev = 0;
-
-
     private PullService pullService;
     private JSlider oxygenSlider;
     private JSlider skinConductanceSlider;
+
+    private JRadioButton quickSortRadioButton;
+    private JRadioButton simulatedAnnealingRadioButton;
+
+    private JFormattedTextField temperatureField;
+    private JFormattedTextField coolDownRateField;
+    private JFormattedTextField numMeasurementsField;
 
     /**
      * Creates new form plotWindow
@@ -130,11 +131,6 @@ public class GraphPanel extends JPanel implements AdjustmentListener, EcgProvide
         this.paramOb = parameters;
         this.calcOb = new EcgCalc(paramOb, logOb);
         this.ecgLog = logOb;
-
-        // TEST code (Thomas)
-        this.lastLastPointX = 0;
-        this.numMeasurements = 270;
-        this.pk = new QRSDetector(this.numMeasurements);
 
         initComponents();
         initWindow();
@@ -249,22 +245,87 @@ public class GraphPanel extends JPanel implements AdjustmentListener, EcgProvide
 
         add(mainPanel, java.awt.BorderLayout.CENTER);
 
+        // Peak Detection panels:
+        NumberFormat integerFormat = NumberFormat.getNumberInstance();
+        NumberFormat decimalFormat = NumberFormat.getNumberInstance();
+        decimalFormat.setMinimumFractionDigits(1);
+
+        JPanel peakControlPanel = new JPanel(new BorderLayout());
+        JPanel peakControlContent = new JPanel(new GridLayout(2,1));
+
+        JPanel peakControlBar = new JPanel(new GridLayout(0,1));
+        peakControlBar.setBorder(BorderFactory.createTitledBorder("Peak detection"));
+
+        quickSortRadioButton = new JRadioButton("Quick Sort");
+        quickSortRadioButton.setSelected(true);
+        simulatedAnnealingRadioButton = new JRadioButton("Simulated Annealing");
+
+        JPanel numMeasurementPanel = new JPanel(new BorderLayout());
+        numMeasurementPanel.setBorder(BorderFactory.createTitledBorder("To observe"));
+
+        numMeasurementsField = new JFormattedTextField(integerFormat);
+        numMeasurementsField.setValue(80);
+        numMeasurementsField.setColumns(10);
+        numMeasurementPanel.add(numMeasurementsField);
+
+
+        ButtonGroup radioGroup = new ButtonGroup();
+        radioGroup.add(quickSortRadioButton);
+        radioGroup.add(simulatedAnnealingRadioButton);
+
+        JPanel simulatedAnnealingOption = new JPanel(new GridLayout(0,1, 0, 5));
+        simulatedAnnealingOption.setBorder(BorderFactory.createTitledBorder("SA Options"));
+
+        JPanel temperaturePanel = new JPanel(new BorderLayout());
+        temperaturePanel.setBorder(BorderFactory.createTitledBorder("Temperature"));
+
+        temperatureField = new JFormattedTextField(decimalFormat);
+        temperatureField.setValue(1.0);
+        temperatureField.setColumns(10);
+        temperaturePanel.add(temperatureField);
+
+        JPanel coolDownRatePanel = new JPanel(new BorderLayout());
+        coolDownRatePanel.setBorder(BorderFactory.createTitledBorder("Cooldown Rate"));
+
+        coolDownRateField = new JFormattedTextField(decimalFormat);
+        coolDownRateField.setValue(0.99);
+        coolDownRateField.setColumns(10);
+        coolDownRatePanel.add(coolDownRateField);
+
+        // SA option fields
+        simulatedAnnealingOption.add(temperaturePanel);
+        simulatedAnnealingOption.add(coolDownRatePanel);
+
+        // Radio Buttons and num measurements.
+        peakControlBar.add(numMeasurementPanel);
+        peakControlBar.add(quickSortRadioButton);
+        peakControlBar.add(simulatedAnnealingRadioButton);
+
+        // The two boxes "Peak Detection & Simulated Annealing Option"
+        peakControlContent.add(peakControlBar);
+        peakControlContent.add(simulatedAnnealingOption);
+
+        // Added to the right
+        peakControlPanel.add(peakControlContent, BorderLayout.NORTH);
+
+
+        add(peakControlPanel, BorderLayout.EAST);
+
         JPanel sliderControllerPanel = new JPanel();
         sliderControllerPanel.setLayout(new GridLayout(2, 1));
 
-
         JPanel oxygenControllerPanel = new JPanel();
         oxygenControllerPanel.setLayout(new BorderLayout());
+        oxygenControllerPanel.setBorder(BorderFactory.createTitledBorder("Oxygen saturation"));
         oxygenSlider = new JSlider();
-        oxygenControllerPanel.add(new JLabel("Oxygen saturation"), BorderLayout.NORTH);
         oxygenControllerPanel.add(oxygenSlider, BorderLayout.SOUTH);
 
         sliderControllerPanel.add(oxygenControllerPanel);
 
         JPanel skinConductancePanel = new JPanel();
         skinConductancePanel.setLayout(new BorderLayout());
+        skinConductancePanel.setBorder(BorderFactory.createTitledBorder("Skin conductance"));
         skinConductanceSlider = new JSlider();
-        skinConductancePanel.add(new JLabel("Skin conductance"), BorderLayout.NORTH);
         skinConductancePanel.add(skinConductanceSlider, BorderLayout.SOUTH);
 
         sliderControllerPanel.add(skinConductancePanel);
@@ -479,7 +540,7 @@ public class GraphPanel extends JPanel implements AdjustmentListener, EcgProvide
         // Otherwise, draw and return positive signal.
         g.drawString(msg, x, y);
 //                ecgFrame.revalidate();
-//                ecgFrame.repaint();        
+//                ecgFrame.repaint();
         return typeSize;
     }
 
@@ -548,6 +609,26 @@ public class GraphPanel extends JPanel implements AdjustmentListener, EcgProvide
         return plotZoom;
     }
 
+    @Override
+    public boolean getPeakDetectionMethod() {
+        return quickSortRadioButton.isSelected();
+    }
+
+    @Override
+    public double getSAtemperature() {
+        return (double)temperatureField.getValue();
+    }
+
+    @Override
+    public double getSAcoolDownRate() {
+        return (double)coolDownRateField.getValue();
+    }
+
+    @Override
+    public int getObservationLimit() {
+        return (int)numMeasurementsField.getValue();
+    }
+
     private class ECGPanel extends JPanel {
 
         public void paintComponent(Graphics g) {
@@ -604,7 +685,7 @@ public class GraphPanel extends JPanel implements AdjustmentListener, EcgProvide
                     g.drawLine(lastPoint.x, lastPoint.y, x, y);
 
                     /*
-                     * Set the current point to be the last, and 
+                     * Set the current point to be the last, and
                      * get a new point to plot in the following loop.
                      */
                     lastPoint.setLocation(x, y);

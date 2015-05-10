@@ -16,23 +16,13 @@ import java.util.logging.Logger;
 public class ComplexDetector {
     private static final Logger LOGGER = Logger.getLogger(ComplexDetector.class.getSimpleName());
 
-    private static AverageValue globalAverage = new AverageValue(80, 1);
-
     private static final int NUM_MEASUREMENTS = 80;
 
-    private static QRSDetector qrsDetector = new QRSDetector(NUM_MEASUREMENTS);
+    private static QRSDetector qrsDetector = new QRSDetector(NUM_MEASUREMENTS, true);
 
     private static int i = 0;
     private static int startOfMeasurementsPositionX = 0;
     private static int initialZero = 0;
-
-    // For drawing what we 'analyze' see NOTE further down:
-    private static int prevX = 0;
-    private static int prevY = 0;
-
-    // Updating the mean:
-    private static double mean = 0;
-
 
     public static void onSignalReceived(EcgProvider ecgProvider) {
 
@@ -43,7 +33,7 @@ public class ComplexDetector {
         double voltage = ecgProvider.getVoltage();
 
         // Time and plotZoom for representing current x position:
-        double totalTime = ecgProvider.getTime();
+        double time = ecgProvider.getTime();
         double plotZoom = ecgProvider.getPlotZoom();
 
         // Graphics and points for drawing:
@@ -64,26 +54,7 @@ public class ComplexDetector {
         double timestamps[] = new double[3];
         double voltages[] = new double[3];
 
-        // TODO (NOTE)
-        // We miss about 4 - 5 measures with a Sample frequency of 10
-        // This draws only the data we analyze and draws the gaps between the missing values.
-/*
-        g.setColor(Color.RED);
-        g.drawLine(lastPoint.x, lastPoint.y + 120, currentPoint.x, currentPoint.y + 120);
-
-        // Prevent drawing lines across the window on repaint (wrap);
-        if ((prevX - lastPoint.x) <= 500) {
-            g.drawLine(prevX, prevY + 120, lastPoint.x, lastPoint.y + 120);
-        }
-
-        prevX = currentPoint.x;
-        prevY = currentPoint.y;
-*/
-
-        //double mean = globalAverage.getValue();
-        //System.out.println("mean: " + mean);
-
-        qrsDetector.add(voltage, totalTime);
+        qrsDetector.add(voltage, time);
 
         // Draw each measures:
         if (i != 0  &&  (i % NUM_MEASUREMENTS) == 0) {
@@ -121,7 +92,7 @@ public class ComplexDetector {
             } else {
 
                 // Reset x position based on timestamps after a wrap (starting at x = 0 again - for drawing);
-                initialZero = (int)(totalTime / plotZoom) - currentPoint.x;
+                initialZero = (int)(time / plotZoom) - currentPoint.x;
 
                 g.setColor(Color.RED);
 
@@ -143,17 +114,3 @@ public class ComplexDetector {
         i++;
     }
 }
-
-
-// TODO - For looking at ln(HF):
-/*
-total += vol;
-double mean = vol / i;
-double temp = 0;
-for (int ii = 0; ii<i; ii++) {
-    double a = calcOb.getEcgResultVoltage(ii);
-    temp += (mean-a) * (mean-a);
-}
-
-stdDev = Math.sqrt(temp / i);
-*/
