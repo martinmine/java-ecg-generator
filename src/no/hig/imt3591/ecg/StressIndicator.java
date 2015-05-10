@@ -19,19 +19,19 @@ public class StressIndicator {
     }
 
     private StressIndicator() {
-        pulse = new VariabilityIdentifier(70, 0.2, 20, 0.8);
-        skinConductance = new VariabilityIdentifier(60, 0.2, 20, 0.8);
-        oxygenSaturation = new VariabilityIdentifier(20, 0.2, 20, 0.8);
+        this.pulse = new VariabilityIdentifier(70, 0.2, 20, 0.8);
+        this.skinConductance = new VariabilityIdentifier(60, 0.2, 20, 0.8);
+        this.oxygenSaturation = new VariabilityIdentifier(20, 0.2, 20, 0.8);
     }
 
-    public void onSignalReceived(double skinResistanceValue, double oxygenSaturationValue, double pulseValue) {
+    public void onSignalReceived(final double skinResistanceValue, final double oxygenSaturationValue, final double pulseValue) {
+        final double skinVariability = skinConductance.addValue(skinResistanceValue);
+        final double oxygenVariability = oxygenSaturation.addValue(oxygenSaturationValue);
+        final double pulseVariability = pulse.addValue(pulseValue);
+
         LOGGER.info("Skin resistance: " + skinResistanceValue + " oxygenSaturation: " + oxygenSaturationValue + " pulse: " + pulseValue);
-
-        double s = skinConductance.addValue(skinResistanceValue);
-        double o = oxygenSaturation.addValue(oxygenSaturationValue);
-        double p = pulse.addValue(pulseValue);
-
-        LOGGER.info("Variability: Skin: " + s + ", Oxygen: " + o + ", Pulse: " + p);
+        LOGGER.info("Variability: Skin: " + skinVariability + ", Oxygen: " + oxygenVariability + ", Pulse: " + pulseVariability);
+        //DecisionMaking.getInstance().onEnter(0, pulseValue, pulseVariability, oxygenSaturationValue, oxygenVariability, skinResistanceValue, skinVariability);
     }
 
     public void onTearDown() {

@@ -59,8 +59,8 @@ public class DecisionTree<T> {
         /**
          * Find the attribute with the highest overall information gain
          */
-        for (Field field : this.attributes) {
-            Attribute attribute = field.getAnnotation(Attribute.class);
+        for (final Field field : this.attributes) {
+            final Attribute attribute = field.getAnnotation(Attribute.class);
             double subsetGain = setEntropy.getEntropy();
 
             if (attribute.type() == AttributeType.CATEGORICAL) {
