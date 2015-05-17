@@ -1,6 +1,7 @@
 package no.hig.imt3591.ecg;
 
 import java.awt.*;
+import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,14 +15,10 @@ import java.util.List;
 public class QRSDetector {
 
     private List<Point.Double> observations;
+    private IRDetection irDetection;
+    private Point.Double[] point;
 
-    private QuickSort quickSort;
-    private SimulatedAnnealing simulatedAnnealing;
-
-    private double[] voltage;
-    private double[] timestamp;
     private int maxObservations;
-    private boolean isQuickSort;
 
     public static final int Q = 0;
     public static final int R = 1;
@@ -29,18 +26,7 @@ public class QRSDetector {
 
     private void analyzeInput() {
 
-        if (isQuickSort) {
-
-            // Finds the biggest voltage out of the observations
-            Point.Double point = quickSort.getMaximum(observations);
-
-            // Update R point (timestamp, voltage):
-            timestamp[R] = point.getX();
-            voltage[R] = point.getY();
-
-        } else {
-            voltage[R] = simulatedAnnealing.search();
-        }
+        point[R] = irDetection.getMaximum();
 
         // TODO (NOTE)
         // The code below is for finding Q and S.
@@ -99,17 +85,15 @@ public class QRSDetector {
 
     }
 
-    public QRSDetector(int num, boolean isQuickSort) {
+    public QRSDetector(int num, boolean isQuickSort, double temperature, double coolingRate, double temperatureLimit) {
         this.observations = new ArrayList<>();
-
-        this.isQuickSort = isQuickSort;
+        this.irDetection = RDetectionFactory.create(this.observations, isQuickSort, temperature, coolingRate, temperatureLimit);
         this.maxObservations = num;
 
-        quickSort = new QuickSort();
-        simulatedAnnealing = new SimulatedAnnealing(this.observations, 1.0d, 0.99d);
-
-        voltage = new double[3];
-        timestamp = new double[3];
+        this.point = new Point.Double[3];
+        this.point[Q] = new Point2D.Double(0,0);
+        this.point[R] = new Point2D.Double(0,0);
+        this.point[S] = new Point2D.Double(0,0);
     }
 
     public void add(double voltage, double time) {
@@ -129,10 +113,10 @@ public class QRSDetector {
     }
 
     public double getVoltage(int type) {
-        return voltage[type];
+        return point[type].getY();
     }
 
     public double getTimestamp(int type) {
-        return timestamp[type];
+        return point[type].getX();
     }
 }

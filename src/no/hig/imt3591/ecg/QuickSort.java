@@ -3,7 +3,7 @@ package no.hig.imt3591.ecg;
 import java.awt.*;
 import java.util.List;
 
-public class QuickSort {
+public class QuickSort implements IRDetection {
 
     private List<Point.Double> observations;
 
@@ -21,7 +21,6 @@ public class QuickSort {
         Point.Double pivot = observations.get(pivotIndex);
 
         while (i <= j) {
-
 
             while (observations.get(i).getY() < pivot.getY()) {
                 i++;
@@ -45,8 +44,12 @@ public class QuickSort {
         }
     }
 
-    public Point.Double getMaximum(List<Point.Double> list) {
+    public QuickSort(List<Point.Double> list) {
         this.observations = list;
+    }
+
+    @Override
+    public Point.Double getMaximum() {
         quickSort(0, observations.size() - 1);
         return observations.get(observations.size() - 1);
     }

@@ -16,20 +16,38 @@ import java.util.logging.Logger;
 public class ComplexDetector {
     private static final Logger LOGGER = Logger.getLogger(ComplexDetector.class.getSimpleName());
 
-    private static final int NUM_MEASUREMENTS = 80;
+    private int count = 0;
+    private int observations;
+    private QRSDetector qrsDetector;
+    
+    // Drawing variables
+    private int startOfMeasurementsPositionX;
+    private int initialZero;
+    private int ovalSize;
+    private Point[] point;
+    private double[] timestamps;
+    private double[] voltages;
 
-    private static QRSDetector qrsDetector = new QRSDetector(NUM_MEASUREMENTS, true);
+    public ComplexDetector(int observations, boolean isQuickSort, double temperature, double coolingRate, double temperatureLimit) {
+        this.count = 0;
+        this.initialZero = 0;
+        this.startOfMeasurementsPositionX = 0;
 
-    private static int i = 0;
-    private static int startOfMeasurementsPositionX = 0;
-    private static int initialZero = 0;
+        this.observations = observations;
+        this.qrsDetector = new QRSDetector(observations, isQuickSort, temperature, coolingRate, temperatureLimit);
 
-    public static void onSignalReceived(EcgProvider ecgProvider) {
+        // Drawing variables:
+        this.ovalSize = 10;
+        this.point = new Point[3];
+        this.point[QRSDetector.Q] = new Point(0,0);
+        this.point[QRSDetector.R] = new Point(0,0);
+        this.point[QRSDetector.S] = new Point(0,0);
+        this.timestamps = new double[3];
+        this.voltages = new double[3];
+    }
 
-        // Oval size for drawing Q, R, and S points.
-        int ovalSize = 10;
+    public void onSignalReceived(EcgProvider ecgProvider) {
 
-        //double pulse = ecgProvider.getPulse();
         double voltage = ecgProvider.getVoltage();
 
         // Time and plotZoom for representing current x position:
@@ -45,19 +63,11 @@ public class ComplexDetector {
         int frameAmplitude = ecgProvider.getFrameAmplitude();
         double amplitude = ecgProvider.getAmplitude();
 
-        // Initializing the Q, R, and S points for drawing:
-        Point point[] = new Point[3];
-        point[QRSDetector.Q] = new Point(0,0);
-        point[QRSDetector.R] = new Point(0,0);
-        point[QRSDetector.S] = new Point(0,0);
-
-        double timestamps[] = new double[3];
-        double voltages[] = new double[3];
-
+        // Add signal received
         qrsDetector.add(voltage, time);
 
-        // Draw each measures:
-        if (i != 0  &&  (i % NUM_MEASUREMENTS) == 0) {
+        // Draw each observations:
+        if (count != 0  &&  (count % observations) == 0) {
 
             // Retrieve Q point [timestamp, voltage] from observed measures.
             timestamps[QRSDetector.Q] = qrsDetector.getTimestamp(QRSDetector.Q);
@@ -111,6 +121,6 @@ public class ComplexDetector {
             startOfMeasurementsPositionX = currentPoint.x;
         }
 
-        i++;
+        count++;
     }
 }

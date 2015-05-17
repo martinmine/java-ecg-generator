@@ -116,11 +116,13 @@ public class GraphPanel extends JPanel implements AdjustmentListener, EcgProvide
     private PullService pullService;
     private JSlider oxygenSlider;
     private JSlider skinConductanceSlider;
+    private JSlider samplingFrequencySlider;
 
     private JRadioButton quickSortRadioButton;
     private JRadioButton simulatedAnnealingRadioButton;
 
     private JFormattedTextField temperatureField;
+    private JFormattedTextField temperatureLimitField;
     private JFormattedTextField coolDownRateField;
     private JFormattedTextField numMeasurementsField;
 
@@ -288,13 +290,22 @@ public class GraphPanel extends JPanel implements AdjustmentListener, EcgProvide
         coolDownRatePanel.setBorder(BorderFactory.createTitledBorder("Cooldown Rate"));
 
         coolDownRateField = new JFormattedTextField(decimalFormat);
-        coolDownRateField.setValue(0.99);
+        coolDownRateField.setValue(0.95);
         coolDownRateField.setColumns(10);
         coolDownRatePanel.add(coolDownRateField);
+
+        JPanel temperatureLimitPanel = new JPanel(new BorderLayout());
+        temperatureLimitPanel.setBorder(BorderFactory.createTitledBorder("Temperature Limit"));
+
+        temperatureLimitField = new JFormattedTextField(decimalFormat);
+        temperatureLimitField.setValue(0.01);
+        temperatureLimitField.setColumns(10);
+        temperatureLimitPanel.add(temperatureLimitField);
 
         // SA option fields
         simulatedAnnealingOption.add(temperaturePanel);
         simulatedAnnealingOption.add(coolDownRatePanel);
+        simulatedAnnealingOption.add(temperatureLimitPanel);
 
         // Radio Buttons and num measurements.
         peakControlBar.add(numMeasurementPanel);
@@ -308,16 +319,20 @@ public class GraphPanel extends JPanel implements AdjustmentListener, EcgProvide
         // Added to the right
         peakControlPanel.add(peakControlContent, BorderLayout.NORTH);
 
-
         add(peakControlPanel, BorderLayout.EAST);
 
         JPanel sliderControllerPanel = new JPanel();
-        sliderControllerPanel.setLayout(new GridLayout(2, 1));
+        sliderControllerPanel.setLayout(new GridLayout(0, 1));
 
         JPanel oxygenControllerPanel = new JPanel();
         oxygenControllerPanel.setLayout(new BorderLayout());
         oxygenControllerPanel.setBorder(BorderFactory.createTitledBorder("Oxygen saturation"));
-        oxygenSlider = new JSlider();
+        oxygenSlider = new JSlider(0,100);
+        oxygenSlider.setValue(90);
+        oxygenSlider.setMajorTickSpacing(10);
+        oxygenSlider.setMinorTickSpacing(1);
+        oxygenSlider.setPaintTicks(true);
+        oxygenSlider.setPaintLabels(true);
         oxygenControllerPanel.add(oxygenSlider, BorderLayout.SOUTH);
 
         sliderControllerPanel.add(oxygenControllerPanel);
@@ -325,10 +340,27 @@ public class GraphPanel extends JPanel implements AdjustmentListener, EcgProvide
         JPanel skinConductancePanel = new JPanel();
         skinConductancePanel.setLayout(new BorderLayout());
         skinConductancePanel.setBorder(BorderFactory.createTitledBorder("Skin conductance"));
-        skinConductanceSlider = new JSlider();
+        skinConductanceSlider = new JSlider(0,100);
+        skinConductanceSlider.setValue(100);
+        skinConductanceSlider.setMajorTickSpacing(10);
+        skinConductanceSlider.setMinorTickSpacing(1);
+        skinConductanceSlider.setPaintTicks(true);
+        skinConductanceSlider.setPaintLabels(true);
         skinConductancePanel.add(skinConductanceSlider, BorderLayout.SOUTH);
 
         sliderControllerPanel.add(skinConductancePanel);
+
+        JPanel samplingFrequencyPanel = new JPanel(new BorderLayout());
+        samplingFrequencyPanel.setBorder(BorderFactory.createTitledBorder("Sampling Frequency"));
+        samplingFrequencySlider = new JSlider(0, 25);
+        samplingFrequencySlider.setValue(10);
+        samplingFrequencySlider.setMajorTickSpacing(5);
+        samplingFrequencySlider.setMinorTickSpacing(1);
+        samplingFrequencySlider.setPaintTicks(true);
+        samplingFrequencySlider.setPaintLabels(true);
+        samplingFrequencyPanel.add(samplingFrequencySlider, BorderLayout.SOUTH);
+
+        sliderControllerPanel.add(samplingFrequencyPanel);
 
         add(sliderControllerPanel, BorderLayout.SOUTH);
 
@@ -615,18 +647,28 @@ public class GraphPanel extends JPanel implements AdjustmentListener, EcgProvide
     }
 
     @Override
-    public double getSAtemperature() {
+    public double getSATemperature() {
+        return (double)temperatureField.getValue();
+    }
+
+    @Override
+    public double getSATemperatureLimit() {
         return (double)temperatureField.getValue();
     }
 
     @Override
     public double getSAcoolDownRate() {
-        return (double)coolDownRateField.getValue();
+        return (double)temperatureLimitField.getValue();
     }
 
     @Override
     public int getObservationLimit() {
-        return (int)numMeasurementsField.getValue();
+        return Integer.parseInt(numMeasurementsField.getText().replaceAll(",",""));
+    }
+
+    @Override
+    public int getSamplingFrequency() {
+        return samplingFrequencySlider.getValue();
     }
 
     private class ECGPanel extends JPanel {
