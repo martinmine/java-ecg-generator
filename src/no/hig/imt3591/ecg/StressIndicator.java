@@ -19,7 +19,7 @@ public class StressIndicator {
     }
 
     private StressIndicator() {
-        this.pulse = new VariabilityIdentifier(70, 0.2, 20, 0.8);
+        this.pulse = new VariabilityIdentifier(60, 0.2, 20, 0.8);
         this.skinConductance = new VariabilityIdentifier(60, 0.2, 20, 0.8);
         this.oxygenSaturation = new VariabilityIdentifier(20, 0.2, 20, 0.8);
     }

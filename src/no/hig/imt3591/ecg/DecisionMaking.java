@@ -1,6 +1,7 @@
 package no.hig.imt3591.ecg;
 
 import no.hig.imt3591.ecg.decisions.DecisionTreeFactory;
+import no.hig.imt3591.ecg.decisions.LearningObservation;
 import no.hig.imt3591.ecg.decisions.SensorObservation;
 import no.hig.imt3591.id3.DecisionTree;
 import no.hig.imt3591.id3.ITreeResult;
@@ -13,12 +14,13 @@ import java.io.IOException;
  * Creates decisions based on input data towards decision tree(s).
  */
 public class DecisionMaking {
-    private DecisionTree<SensorObservation> tree;
     private static final DecisionMaking INSTANCE = new DecisionMaking();
-
     public static DecisionMaking getInstance() {
         return INSTANCE;
     }
+
+    private DecisionTree<SensorObservation> tree;
+    private String sampleOutputAction;
 
     public DecisionMaking() {
         try {
@@ -37,5 +39,18 @@ public class DecisionMaking {
         } else {
             System.out.println("WARNING: NO RESULT");
         }
+
+        if (sampleOutputAction != null) {
+            try {
+                DecisionTreeFactory.addLearningObservation(new LearningObservation(ecg, pulse, pulseChange, oxygen, oxygenChange, skin, skinChange, sampleOutputAction));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            sampleOutputAction = null;
+        }
+    }
+
+    public void queueLearningSample(final String outputAction) {
+        this.sampleOutputAction = outputAction;
     }
 }

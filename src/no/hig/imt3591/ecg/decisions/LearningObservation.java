@@ -15,18 +15,21 @@ public class LearningObservation extends SensorObservation {
         super(cardiacEvent, pulse, pulseChange, oxygen, oxygenChange, skin, skinChange);
     }
 
+    public LearningObservation(double cardiacEvent, double pulse, double pulseChange, double oxygen, double oxygenChange, double skin, double skinChange, String result) {
+        super(cardiacEvent, pulse, pulseChange, oxygen, oxygenChange, skin, skinChange);
+        this.result = result;
+    }
+
     public Class<? extends ITreeResult> getOutputType() {
         switch (result) {
-            case "stressed": {
+            case "stressed":
                 return PerformAntiStressOutput.class;
-            }
-            case "heartProblem": {
+            case "heartProblem":
                 return ReduceSpeedOutput.class;
-            }
-            default:
-            case "nothing": {
+            case "nothing":
                 return IgnoreActionOutput.class;
-            }
+            default:
+                throw new RuntimeException(String.format("%s is an unknown result type", result));
         }
     }
 }

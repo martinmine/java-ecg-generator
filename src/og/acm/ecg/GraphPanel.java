@@ -9,6 +9,7 @@ package og.acm.ecg;/*
  * @author Mauricio Villarroel (m.villarroel@acm.og)
  */
 
+import no.hig.imt3591.ecg.DecisionMaking;
 import no.hig.imt3591.ecg.EcgProvider;
 import no.hig.imt3591.ecg.PullService;
 import no.hig.imt3591.ecg.QRSDetector;
@@ -18,6 +19,8 @@ import javax.swing.border.*;
 import javax.swing.plaf.ButtonUI;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.AdjustmentEvent;
 import java.awt.event.AdjustmentListener;
 import java.text.FieldPosition;
@@ -26,6 +29,7 @@ import java.text.NumberFormat;
 import java.text.ParsePosition;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.Vector;
 
 public class GraphPanel extends JPanel implements AdjustmentListener, EcgProvider {
 
@@ -328,7 +332,7 @@ public class GraphPanel extends JPanel implements AdjustmentListener, EcgProvide
         oxygenControllerPanel.setLayout(new BorderLayout());
         oxygenControllerPanel.setBorder(BorderFactory.createTitledBorder("Oxygen saturation"));
         oxygenSlider = new JSlider(0,100);
-        oxygenSlider.setValue(90);
+        oxygenSlider.setValue(20);
         oxygenSlider.setMajorTickSpacing(10);
         oxygenSlider.setMinorTickSpacing(1);
         oxygenSlider.setPaintTicks(true);
@@ -341,7 +345,7 @@ public class GraphPanel extends JPanel implements AdjustmentListener, EcgProvide
         skinConductancePanel.setLayout(new BorderLayout());
         skinConductancePanel.setBorder(BorderFactory.createTitledBorder("Skin conductance"));
         skinConductanceSlider = new JSlider(0,100);
-        skinConductanceSlider.setValue(100);
+        skinConductanceSlider.setValue(60);
         skinConductanceSlider.setMajorTickSpacing(10);
         skinConductanceSlider.setMinorTickSpacing(1);
         skinConductanceSlider.setPaintTicks(true);
@@ -361,6 +365,26 @@ public class GraphPanel extends JPanel implements AdjustmentListener, EcgProvide
         samplingFrequencyPanel.add(samplingFrequencySlider, BorderLayout.SOUTH);
 
         sliderControllerPanel.add(samplingFrequencyPanel);
+
+
+        JPanel learningSamplePanel = new JPanel(new BorderLayout());
+        learningSamplePanel.setBorder(BorderFactory.createTitledBorder("Learning"));
+
+        final JButton sampleBtn = new JButton("Sample");
+
+
+        final Vector<String> options = new Vector<>();
+        options.add("nothing");
+        options.add("heartProblem");
+        options.add("stressed");
+        learningSamplePanel.add(sampleBtn, BorderLayout.CENTER);
+
+        final JComboBox<String> outputOptions = new JComboBox<>(options);
+        learningSamplePanel.add(outputOptions, BorderLayout.WEST);
+
+        sampleBtn.addActionListener(e -> DecisionMaking.getInstance().queueLearningSample(String.valueOf(outputOptions.getSelectedItem())));
+
+        sliderControllerPanel.add(learningSamplePanel);
 
         add(sliderControllerPanel, BorderLayout.SOUTH);
 

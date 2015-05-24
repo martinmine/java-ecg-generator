@@ -1,0 +1,21 @@
+[
+    {
+        "cardiacEvent": 0,
+        "pulse": 50,
+        "pulseChange": 0.3,
+        "oxygen": 0.3,
+        "oxygenChange": 0.3,
+        "skin": 0.5,
+        "skinChange": 0.2,
+        "result": "nothing"
+    },{
+        "cardiacEvent": 1,
+        "pulse": 90,
+        "pulseChange": 0,
+        "oxygen": 30,
+        "oxygenChange": 1.0,
+        "skin": 0.8,
+        "skinChange": 0.9,
+        "result": "heartProblem"
+    }
+]
