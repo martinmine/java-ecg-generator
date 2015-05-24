@@ -5,13 +5,6 @@ import java.util.logging.Logger;
 
 /**
  * This class handles drawing the QRS complex and the data set being analyzed.
- *
- * TODO: Find a solution to fit bpm (RR interval)
- * Problem: The animation starts on an R peak. (middle fo a QRS complex)
- * Should be dynamically changed depending on sample frequency (SF) and number of measurements (NOM).
- * SF is a factor into this as some samples doesn't get detected which again plays a huge
- * role in how many measures we analyze at a time.
- * Current solution: Happens to looks good with 80 with a Sample frequency of 10.
  */
 public class ComplexDetector {
     private static final Logger LOGGER = Logger.getLogger(ComplexDetector.class.getSimpleName());
@@ -46,6 +39,10 @@ public class ComplexDetector {
         this.voltages = new double[3];
     }
 
+    /**
+     * Receives new data from the Pull service. Drawing each batch of observations
+     * @param ecgProvider Continuous data inputs.
+     */
     public void onSignalReceived(EcgProvider ecgProvider) {
 
         double voltage = ecgProvider.getVoltage();
