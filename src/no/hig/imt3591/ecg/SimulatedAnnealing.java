@@ -8,7 +8,7 @@ import java.util.Random;
  * Hill climbing with simulated annealing
  *
  */
-public class SimulatedAnnealing {
+public class SimulatedAnnealing implements IRDetection {
 
     private List<Point.Double> observations;
     private int currentStateIndex;
@@ -16,16 +16,17 @@ public class SimulatedAnnealing {
 
     private double initialTemperature;
     private double coolingRate;
-    private int leftIndex;
-    private int rightIndex;
+    private double temperatureLimit;
+    //private int leftIndex;
+    //private int rightIndex;
 
-
-    public SimulatedAnnealing(List<Point.Double> list, double temperature, double coolingRate) {
+    public SimulatedAnnealing(List<Point.Double> list, double temperature, double coolingRate, double temperatureLimit) {
         this.random = new Random();
         this.observations = list;
         this.currentStateIndex = 0;
         this.initialTemperature = temperature;
         this.coolingRate = coolingRate;
+        this.temperatureLimit = temperatureLimit;
     }
 
     public double energy(int state) {
@@ -39,10 +40,6 @@ public class SimulatedAnnealing {
         if ((state - offset) < 0  ||  (state + offset) > (observations.size() - 1)) {
             return random.nextInt(observations.size() - 1);
         }
-
-        int next = state + (nextIndicator * offset);
-        System.out.println("next\t" + next);
-
 
         return state + (nextIndicator * offset);
     }
@@ -62,7 +59,8 @@ public class SimulatedAnnealing {
         return Math.exp(energyDifference / temperature);
     }
 
-    public double search() {
+    @Override
+    public Point.Double getMaximum() {
         int proposedStateIndex;
         int globalMaximumStateIndex;
 
@@ -76,10 +74,10 @@ public class SimulatedAnnealing {
         currentStateIndex = random.nextInt(observations.size() - 1);
 
         globalMaximumStateIndex = currentStateIndex;
-        leftIndex = currentStateIndex;
-        rightIndex = currentStateIndex;
+        //leftIndex = currentStateIndex;
+        //rightIndex = currentStateIndex;
 
-        while (temperature > 0.01) {
+        while (temperature > temperatureLimit) {
             proposedStateIndex = neighbor(currentStateIndex);
             currentEnergy = energy(currentStateIndex);
             neighborEnergy = energy(proposedStateIndex);
@@ -90,6 +88,7 @@ public class SimulatedAnnealing {
             if (probability >= acceptanceBoundary) {
                 currentStateIndex = proposedStateIndex;
 
+                /*
                 if (currentStateIndex < leftIndex) {
                     leftIndex = currentStateIndex;
                 }
@@ -97,6 +96,7 @@ public class SimulatedAnnealing {
                 if (this.currentStateIndex > rightIndex) {
                     rightIndex = currentStateIndex;
                 }
+                */
 
                 if (energy(currentStateIndex) > energy(globalMaximumStateIndex)) {
                     globalMaximumStateIndex = currentStateIndex;
@@ -106,8 +106,6 @@ public class SimulatedAnnealing {
             temperature *= coolingRate;
         }
 
-        System.out.println("Boundary: " + leftIndex + " - " + rightIndex);
-
-        return energy(globalMaximumStateIndex);
+        return observations.get(globalMaximumStateIndex);
     }
 }

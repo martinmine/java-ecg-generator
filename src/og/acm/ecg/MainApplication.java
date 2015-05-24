@@ -59,7 +59,7 @@ public class MainApplication extends javax.swing.JFrame {
     }
 
     private void initWindow() {
-        this.setSize(880, 510);
+        this.setSize(880, 700);
         this.setResizable(false);
         this.setLayout(new BorderLayout());
 
