@@ -22,7 +22,7 @@ public class DecisionTreeTest {
         }
     }
 
-    /*@Test
+    @Test
     public void testTree() {
         observations.add(new Observation<>(FalseOutputValue.class, new TennisObservation(0d, 0d, 0d, 10d)));
         observations.add(new Observation<>(FalseOutputValue.class, new TennisObservation(0d, 0d, 1d, 7d)));
@@ -57,7 +57,7 @@ public class DecisionTreeTest {
         DecisionTree<TennisObservation> tree = new DecisionTree<>(TennisObservation.class, observations);
 
         assertNotNull(tree);
-    }*/
+    }
 
     @Test
     public void testAmbiguous() {
