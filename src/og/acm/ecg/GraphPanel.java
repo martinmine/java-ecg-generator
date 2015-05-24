@@ -23,6 +23,10 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.AdjustmentEvent;
 import java.awt.event.AdjustmentListener;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.channels.FileChannel;
 import java.text.FieldPosition;
 import java.text.Format;
 import java.text.NumberFormat;
@@ -371,18 +375,26 @@ public class GraphPanel extends JPanel implements AdjustmentListener, EcgProvide
         learningSamplePanel.setBorder(BorderFactory.createTitledBorder("Learning"));
 
         final JButton sampleBtn = new JButton("Sample");
-
-
+        final JButton sampleResetBtn = new JButton("Clear");
         final Vector<String> options = new Vector<>();
         options.add("nothing");
         options.add("heartProblem");
         options.add("stressed");
         learningSamplePanel.add(sampleBtn, BorderLayout.CENTER);
+        learningSamplePanel.add(sampleResetBtn, BorderLayout.EAST);
 
         final JComboBox<String> outputOptions = new JComboBox<>(options);
         learningSamplePanel.add(outputOptions, BorderLayout.WEST);
 
         sampleBtn.addActionListener(e -> DecisionMaking.getInstance().queueLearningSample(String.valueOf(outputOptions.getSelectedItem())));
+        sampleResetBtn.addActionListener(e -> {
+            try (FileChannel source = new FileInputStream("initset.json").getChannel();
+                    FileChannel destination = new FileOutputStream("set.json").getChannel()) {
+                destination.transferFrom(source, 0, source.size());
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
+        });
 
         sliderControllerPanel.add(learningSamplePanel);
 
@@ -687,7 +699,7 @@ public class GraphPanel extends JPanel implements AdjustmentListener, EcgProvide
 
     @Override
     public int getObservationLimit() {
-        return Integer.parseInt(numMeasurementsField.getText().replaceAll(",",""));
+        return Integer.parseInt(numMeasurementsField.getText().replaceAll(",", ""));
     }
 
     @Override
