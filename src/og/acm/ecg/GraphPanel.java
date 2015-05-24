@@ -228,17 +228,17 @@ public class GraphPanel extends JPanel implements AdjustmentListener, EcgProvide
         mainPanel.add(plotScrollBar);
         plotScrollBar.setBounds(73, 352, 580, 16);
 
-        lblMinAmplitude.setFont(new java.awt.Font("Dialog", 1, 9));
+        lblMinAmplitude.setFont(new java.awt.Font("Dialog", Font.PLAIN, 9));
         lblMinAmplitude.setText("-0.001");
         mainPanel.add(lblMinAmplitude);
         lblMinAmplitude.setBounds(30, 309, 40, 12);
 
-        lblOrigin.setFont(new java.awt.Font("Dialog", 1, 9));
+        lblOrigin.setFont(new java.awt.Font("Dialog", Font.PLAIN, 9));
         lblOrigin.setText("0.00");
         mainPanel.add(lblOrigin);
         lblOrigin.setBounds(30, 167, 40, 12);
 
-        lblMaxAmplitude.setFont(new java.awt.Font("Dialog", 1, 9));
+        lblMaxAmplitude.setFont(new java.awt.Font("Dialog", Font.PLAIN, 9));
         lblMaxAmplitude.setText("0.001");
         mainPanel.add(lblMaxAmplitude);
         lblMaxAmplitude.setBounds(30, 25, 40, 12);
@@ -672,17 +672,17 @@ public class GraphPanel extends JPanel implements AdjustmentListener, EcgProvide
 
     @Override
     public double getSATemperature() {
-        return (double)temperatureField.getValue();
+        return Double.parseDouble(temperatureField.getText().replaceAll(",","."));
     }
 
     @Override
     public double getSATemperatureLimit() {
-        return (double)temperatureField.getValue();
+        return (double)temperatureLimitField.getValue();
     }
 
     @Override
     public double getSAcoolDownRate() {
-        return (double)temperatureLimitField.getValue();
+        return (double)coolDownRateField.getValue();
     }
 
     @Override
