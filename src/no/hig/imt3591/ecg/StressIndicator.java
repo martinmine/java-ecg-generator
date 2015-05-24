@@ -31,7 +31,7 @@ public class StressIndicator {
 
         LOGGER.info("Skin resistance: " + skinResistanceValue + " oxygenSaturation: " + oxygenSaturationValue + " pulse: " + pulseValue);
         LOGGER.info("Variability: Skin: " + skinVariability + ", Oxygen: " + oxygenVariability + ", Pulse: " + pulseVariability);
-        //DecisionMaking.getInstance().onEnter(0, pulseValue, pulseVariability, oxygenSaturationValue, oxygenVariability, skinResistanceValue, skinVariability);
+        DecisionMaking.getInstance().onEnter(0, pulseValue, pulseVariability, oxygenSaturationValue, oxygenVariability, skinResistanceValue, skinVariability);
     }
 
     public void onTearDown() {

@@ -62,6 +62,7 @@ public class DecisionTree<T> {
         for (final Field field : this.attributes) {
             final Attribute attribute = field.getAnnotation(Attribute.class);
             double subsetGain = setEntropy.getEntropy();
+            double subsetThreshold = 0;
 
             if (attribute.type() == AttributeType.CATEGORICAL) {
                 for (double fieldValue : attribute.outputValues()) {
@@ -69,8 +70,8 @@ public class DecisionTree<T> {
                     subsetGain -= fieldEntropy.getInformationGain(setSize);
                 }
             } else if (attribute.type() == AttributeType.CONTINUOUS) {
-                threshold = findLowestThreshold(set, field);
-                Entropy.EntropySet setSplit = Entropy.splitAtThreshold(set, field, threshold);
+                subsetThreshold = findLowestThreshold(set, field);
+                Entropy.EntropySet setSplit = Entropy.splitAtThreshold(set, field, subsetThreshold);
                 subsetGain -= setSplit.left.getInformationGain(setSize);
                 subsetGain -= setSplit.right.getInformationGain(setSize);
             }
@@ -78,11 +79,12 @@ public class DecisionTree<T> {
             if (subsetGain > highestGain) {
                 highestGain = subsetGain;
                 highestGainField = field;
+                threshold = subsetThreshold;
             }
         }
 
         if (highestGainField == null) {
-            throw new RuntimeException("Something went severely wrong, check your data set");
+            throw new RuntimeException("Unable to find something to split on :( check your data set");
         }
 
         final Attribute highestGainFieldAttribute = highestGainField.getAnnotation(Attribute.class);
@@ -112,6 +114,9 @@ public class DecisionTree<T> {
             }
 
             if (new Entropy<>(subsetA).getEntropy() == 0) {
+                if (subsetA.size() == 0) {
+                    throw new RuntimeException("No");
+                }
                 node.addChild(new AlphaLeafNode(threshold, subsetA.get(0).createInstance()));
             } else {
                 node.addChild(new AlphaAttributeNode(threshold, split(subsetA)));
