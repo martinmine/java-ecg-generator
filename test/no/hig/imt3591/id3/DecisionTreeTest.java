@@ -22,7 +22,7 @@ public class DecisionTreeTest {
         }
     }
 
-    @Test
+    /*@Test
     public void testTree() {
         observations.add(new Observation<>(FalseOutputValue.class, new TennisObservation(0d, 0d, 0d, 10d)));
         observations.add(new Observation<>(FalseOutputValue.class, new TennisObservation(0d, 0d, 1d, 7d)));
@@ -53,6 +53,17 @@ public class DecisionTreeTest {
         observations.add(new Observation<>(FalseOutputValue.class, new TennisObservation(0d, 0d, 0d, 3d)));
         observations.add(new Observation<>(TrueOutputValue.class, new TennisObservation(1d, 0d, 0d, 2d)));
         observations.add(new Observation<>(TrueOutputValue.class, new TennisObservation(2d, 0d, 0d, 3d)));
+
+        DecisionTree<TennisObservation> tree = new DecisionTree<>(TennisObservation.class, observations);
+
+        assertNotNull(tree);
+    }*/
+
+    @Test
+    public void testAmbiguous() {
+        observations.add(new Observation<>(FalseOutputValue.class, new TennisObservation(0d, 0d, 0d, 1d)));
+        observations.add(new Observation<>(TrueOutputValue.class, new TennisObservation(0d, 0d, 0d, 5d)));
+        observations.add(new Observation<>(FalseOutputValue.class, new TennisObservation(0d, 0d, 0d, 10d)));
 
         DecisionTree<TennisObservation> tree = new DecisionTree<>(TennisObservation.class, observations);
 

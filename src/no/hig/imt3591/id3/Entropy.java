@@ -58,10 +58,20 @@ public class Entropy<T> {
     }
 
     public static <T> double findEntropyAtThreshold(final List<Observation<T>> set,
-                                                    final Field field, final double threshold) {
+                                                     final Field field, final double threshold) {
+        // Should be T - (left right)
         final Entropy.EntropySet entropy = Entropy.splitAtThreshold(set, field, threshold);
         return (entropy.left.getEntropy() + entropy.right.getEntropy()) / 2;
     }
+
+    public static <T> double findIGAtThreshold(final List<Observation<T>> set, final Field field,
+                                               final double threshold, final double superSetEntropy) {
+        final Entropy.EntropySet entropy = Entropy.splitAtThreshold(set, field, threshold);
+        return superSetEntropy
+                - entropy.left.getInformationGain(set.size())
+                - entropy.right.getInformationGain(set.size());
+    }
+
 
     private void addCount(final Class<? extends ITreeResult> resultType) {
         count.put(resultType, count.getOrDefault(resultType, 0) + 1);
@@ -94,5 +104,9 @@ public class Entropy<T> {
      */
     public double getInformationGain(final double superSetSize) {
         return getEntropySize() / superSetSize * getEntropy();
+    }
+
+    public int getTotalSetCount() {
+        return totalSetCount;
     }
 }

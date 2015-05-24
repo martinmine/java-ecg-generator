@@ -4,6 +4,7 @@ import no.hig.imt3591.id3.annotations.Attribute;
 import no.hig.imt3591.id3.nodes.*;
 
 import java.lang.reflect.Field;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -70,7 +71,7 @@ public class DecisionTree<T> {
                     subsetGain -= fieldEntropy.getInformationGain(setSize);
                 }
             } else if (attribute.type() == AttributeType.CONTINUOUS) {
-                subsetThreshold = findLowestThreshold(set, field);
+                subsetThreshold = findLowestThreshold(set, field, setEntropy.getEntropy());
                 Entropy.EntropySet setSplit = Entropy.splitAtThreshold(set, field, subsetThreshold);
                 subsetGain -= setSplit.left.getInformationGain(setSize);
                 subsetGain -= setSplit.right.getInformationGain(setSize);
@@ -114,9 +115,6 @@ public class DecisionTree<T> {
             }
 
             if (new Entropy<>(subsetA).getEntropy() == 0) {
-                if (subsetA.size() == 0) {
-                    throw new RuntimeException("No");
-                }
                 node.addChild(new AlphaLeafNode(threshold, subsetA.get(0).createInstance()));
             } else {
                 node.addChild(new AlphaAttributeNode(threshold, split(subsetA)));
@@ -138,17 +136,17 @@ public class DecisionTree<T> {
      * @param field The attribute that we want to find a threshold for.
      * @return The threshold value that gives the most information gain.
      */
-    private double findLowestThreshold(final List<Observation<T>> set, final Field field) {
-        double lowestEntropy = 1;
+    private double findLowestThreshold(final List<Observation<T>> set, final Field field, final double setEntropy) {
         double lowestThreshold = 0;
+        double highestIG = -1;
 
         for (final Observation observation : set) {
             final double threshold = observation.getObservationValue(field);
-            final double subsetEntropy = Entropy.findEntropyAtThreshold(set, field, threshold);
+            final double informationGain = Entropy.findIGAtThreshold(set, field, threshold, setEntropy);
 
-            if (lowestEntropy > subsetEntropy) {
+            if (informationGain > highestIG) {
                 lowestThreshold = threshold;
-                lowestEntropy = subsetEntropy;
+                highestIG = informationGain;
             }
         }
 
