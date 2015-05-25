@@ -4,29 +4,29 @@ import no.hig.imt3591.id3.AttributeType;
 import no.hig.imt3591.id3.annotations.Attribute;
 
 /**
- * Created by marti_000 on 10.05.2015.
+ * A sensor observation that contains different sensor values for one observation.
  */
 public class SensorObservation {
     @Attribute(type = AttributeType.CATEGORICAL, outputValues = {0, 1})
-    private double cardiacEvent;
+    private final double cardiacEvent;
 
     @Attribute(type = AttributeType.CONTINUOUS)
-    private double pulse;
+    private final double pulse;
 
     @Attribute(type = AttributeType.CONTINUOUS)
-    private double pulseChange;
+    private final double pulseChange;
 
     @Attribute(type = AttributeType.CONTINUOUS)
-    private double oxygen;
+    private final double oxygen;
 
     @Attribute(type = AttributeType.CONTINUOUS)
-    private double oxygenChange;
+    private final double oxygenChange;
 
     @Attribute(type = AttributeType.CONTINUOUS)
-    private double skin;
+    private final double skin;
 
     @Attribute(type = AttributeType.CONTINUOUS)
-    private double skinChange;
+    private final double skinChange;
 
     public SensorObservation(double cardiacEvent, double pulse, double pulseChange, double oxygen, double oxygenChange, double skin, double skinChange) {
         this.cardiacEvent = cardiacEvent;

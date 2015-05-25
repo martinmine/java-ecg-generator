@@ -1,25 +1,22 @@
 package no.hig.imt3591.ecg;
 
 import java.awt.*;
-import java.util.logging.Logger;
 
 /**
  * This class handles drawing the QRS complex and the data set being analyzed.
  */
 public class ComplexDetector {
-    private static final Logger LOGGER = Logger.getLogger(ComplexDetector.class.getSimpleName());
-
     private int count = 0;
-    private int observations;
-    private QRSDetector qrsDetector;
+    private final int observations;
+    private final QRSDetector qrsDetector;
     
     // Drawing variables
     private int startOfMeasurementsPositionX;
     private int initialZero;
-    private int ovalSize;
-    private Point[] point;
-    private double[] timestamps;
-    private double[] voltages;
+    private final int ovalSize;
+    private final Point[] point;
+    private final double[] timestamps;
+    private final double[] voltages;
 
     public ComplexDetector(int observations, boolean isQuickSort, double temperature, double coolingRate, double temperatureLimit) {
         this.count = 0;

@@ -14,11 +14,11 @@ import java.util.List;
  */
 public class QRSDetector {
 
-    private List<Point.Double> observations;
-    private IRDetection irDetection;
-    private Point.Double[] point;
+    private final List<Point.Double> observations;
+    private final IRDetection irDetection;
+    private final Point.Double[] point;
 
-    private int maxObservations;
+    private final int maxObservations;
 
     public static final int Q = 0;
     public static final int R = 1;

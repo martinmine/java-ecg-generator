@@ -13,6 +13,7 @@ import no.hig.imt3591.ecg.DecisionMaking;
 import no.hig.imt3591.ecg.EcgProvider;
 import no.hig.imt3591.ecg.PullService;
 import no.hig.imt3591.ecg.QRSDetector;
+import no.hig.imt3591.ecg.decisions.outcomes.IDecisionOutput;
 
 import javax.swing.*;
 import javax.swing.border.*;
@@ -35,7 +36,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.Vector;
 
-public class GraphPanel extends JPanel implements AdjustmentListener, EcgProvider {
+public class GraphPanel extends JPanel implements AdjustmentListener, EcgProvider, IDecisionOutput {
 
     /**
      * These constants used in drawText() method for placement
@@ -45,6 +46,7 @@ public class GraphPanel extends JPanel implements AdjustmentListener, EcgProvide
     private static final int LEFT = 1;
     private static final int RIGHT = 2;
 
+    private static GraphPanel currentGraphPanel;
     /**
      * Frame Dimensions.
      */
@@ -134,6 +136,8 @@ public class GraphPanel extends JPanel implements AdjustmentListener, EcgProvide
     private JFormattedTextField coolDownRateField;
     private JFormattedTextField numMeasurementsField;
 
+    private JLabel currentOutput;
+
     /**
      * Creates new form plotWindow
      */
@@ -142,8 +146,14 @@ public class GraphPanel extends JPanel implements AdjustmentListener, EcgProvide
         this.calcOb = new EcgCalc(paramOb, logOb);
         this.ecgLog = logOb;
 
+        currentGraphPanel = this;
+
         initComponents();
         initWindow();
+    }
+
+    public static IDecisionOutput getOutputReference() {
+        return currentGraphPanel;
     }
 
     private void initWindow() {
@@ -397,6 +407,16 @@ public class GraphPanel extends JPanel implements AdjustmentListener, EcgProvide
         });
 
         sliderControllerPanel.add(learningSamplePanel);
+
+
+
+        JPanel decisionOutputPanel = new JPanel(new BorderLayout());
+        decisionOutputPanel.setBorder(BorderFactory.createTitledBorder("Decision output"));
+
+        this.currentOutput = new JLabel("-");
+        decisionOutputPanel.add(currentOutput, BorderLayout.CENTER);
+
+        sliderControllerPanel.add(decisionOutputPanel);
 
         add(sliderControllerPanel, BorderLayout.SOUTH);
 
@@ -693,7 +713,7 @@ public class GraphPanel extends JPanel implements AdjustmentListener, EcgProvide
     }
 
     @Override
-    public double getSAcoolDownRate() {
+    public double getSACoolDownRate() {
         return (double)coolDownRateField.getValue();
     }
 
@@ -705,6 +725,11 @@ public class GraphPanel extends JPanel implements AdjustmentListener, EcgProvide
     @Override
     public int getSamplingFrequency() {
         return samplingFrequencySlider.getValue();
+    }
+
+    @Override
+    public void setOutput(final String output) {
+        SwingUtilities.invokeLater(() -> currentOutput.setText(output));
     }
 
     private class ECGPanel extends JPanel {

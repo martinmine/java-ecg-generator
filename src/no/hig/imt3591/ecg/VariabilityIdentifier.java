@@ -6,14 +6,14 @@ import java.util.logging.Logger;
  * Detects irregularities on data-inputs.
  */
 public class VariabilityIdentifier {
-    private AverageValue globalAverage;
-    private AverageValue currentAverage;
-    private double saveThreshold;
+    private final AverageValue globalAverage;
+    private final AverageValue currentAverage;
+    private final double saveThreshold;
 
     private static final Logger LOGGER = Logger.getLogger(VariabilityIdentifier.class.getSimpleName());
 
-    private double minReadValues;
-    private double deviationAmplifier;
+    private final double minReadValues;
+    private final double deviationAmplifier;
 
     /**
      * Creates a new variability identifier and initializes it for usage.

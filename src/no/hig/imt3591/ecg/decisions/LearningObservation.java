@@ -6,14 +6,10 @@ import no.hig.imt3591.ecg.decisions.outcomes.ReduceSpeedOutput;
 import no.hig.imt3591.id3.ITreeResult;
 
 /**
- * Created by marti_000 on 10.05.2015.
+ * A learning observation that is used to train the decision tree.
  */
 public class LearningObservation extends SensorObservation {
-    private String result;
-
-    public LearningObservation(double cardiacEvent, double pulse, double pulseChange, double oxygen, double oxygenChange, double skin, double skinChange) {
-        super(cardiacEvent, pulse, pulseChange, oxygen, oxygenChange, skin, skinChange);
-    }
+    private final String result;
 
     public LearningObservation(double cardiacEvent, double pulse, double pulseChange, double oxygen, double oxygenChange, double skin, double skinChange, String result) {
         super(cardiacEvent, pulse, pulseChange, oxygen, oxygenChange, skin, skinChange);

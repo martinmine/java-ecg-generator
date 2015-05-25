@@ -1,11 +1,21 @@
 [
     {
+        "result": "heartProblem",
+        "cardiacEvent": 1.0,
+        "pulse": 90.0,
+        "pulseChange": 0.0,
+        "oxygen": 30.0,
+        "oxygenChange": 1.0,
+        "skin": 0.8,
+        "skinChange": 0.9
+    },
+    {
         "result": "nothing",
         "cardiacEvent": 0.0,
         "pulse": 60.0,
         "pulseChange": 1.0,
-        "oxygen": 5.0,
-        "oxygenChange": 0.331421287444232,
+        "oxygen": 20.0,
+        "oxygenChange": 1.0,
         "skin": 1.0,
         "skinChange": 60.0
     },
@@ -14,19 +24,29 @@
         "cardiacEvent": 0.0,
         "pulse": 60.0,
         "pulseChange": 1.0,
-        "oxygen": 50.0,
-        "oxygenChange": 2.0,
+        "oxygen": 6.0,
+        "oxygenChange": 0.37282608695652175,
         "skin": 1.0,
-        "skinChange": 60.0
+        "skinChange": 75.0
     },
     {
-        "result": "nothing",
+        "result": "stressed",
         "cardiacEvent": 0.0,
         "pulse": 60.0,
         "pulseChange": 1.0,
-        "oxygen": 80.0,
-        "oxygenChange": 3.2,
-        "skin": 1.0,
-        "skinChange": 60.0
+        "oxygen": 6.0,
+        "oxygenChange": 0.40194859038142616,
+        "skin": 1.1199999999999999,
+        "skinChange": 84.0
+    },
+    {
+        "result": "stressed",
+        "cardiacEvent": 0.0,
+        "pulse": 60.0,
+        "pulseChange": 1.0,
+        "oxygen": 6.0,
+        "oxygenChange": 0.42961644918940295,
+        "skin": 1.1866666666666668,
+        "skinChange": 89.0
     }
 ]

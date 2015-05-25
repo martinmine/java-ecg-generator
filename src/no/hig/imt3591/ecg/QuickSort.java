@@ -4,11 +4,11 @@ import java.awt.*;
 import java.util.List;
 
 /**
- * Quicksort implementation for finding the Maximum value.
+ * QuickSort implementation for finding the Maximum value.
  */
 public class QuickSort implements IRDetection {
 
-    private List<Point.Double> observations;
+    private final List<Point.Double> observations;
 
     private void swap(int i, int j) {
         Point.Double temp = observations.get(i);

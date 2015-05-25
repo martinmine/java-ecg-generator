@@ -11,10 +11,15 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * Created by marti_000 on 10.05.2015.
+ * Factory class that creates the decision tree based on a data set in set.json.
  */
 public class DecisionTreeFactory {
     private static final String fileName = "set.json";
+
+    /**
+     * @return The decision trained using the data set from set.json.
+     * @throws IOException Unable to load the file.
+     */
     public static DecisionTree<SensorObservation> buildTree() throws IOException {
         final List<Observation<SensorObservation>> trainingSet = new LinkedList<>();
 
@@ -31,6 +36,11 @@ public class DecisionTreeFactory {
         }
     }
 
+    /**
+     * Adds a learning observation to the data set.
+     * @param observation The learning observation.
+     * @throws IOException Unable to write to file.
+     */
     public static void addLearningObservation(final LearningObservation observation) throws IOException {
         LearningObservation[] observations = readDataSet();
         LearningObservation[] allObservations = new LearningObservation[observations.length + 1];

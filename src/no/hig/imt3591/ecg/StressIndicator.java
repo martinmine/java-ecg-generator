@@ -10,9 +10,9 @@ public class StressIndicator {
     private static final StressIndicator INSTANCE = new StressIndicator();
     private static final Logger LOGGER = Logger.getLogger(StressIndicator.class.getSimpleName());
 
-    private VariabilityIdentifier skinConductance;
-    private VariabilityIdentifier oxygenSaturation;
-    private VariabilityIdentifier pulse;
+    private final VariabilityIdentifier skinConductance;
+    private final VariabilityIdentifier oxygenSaturation;
+    private final VariabilityIdentifier pulse;
 
     public static StressIndicator getInstance() {
         return INSTANCE;
@@ -24,6 +24,12 @@ public class StressIndicator {
         this.oxygenSaturation = new VariabilityIdentifier(20, 0.2, 20, 0.8);
     }
 
+    /**
+     * Processes a received signal.
+     * @param skinResistanceValue Skin conductance value.
+     * @param oxygenSaturationValue Oxygen saturation value.
+     * @param pulseValue Current pulse.
+     */
     public void onSignalReceived(final double skinResistanceValue, final double oxygenSaturationValue, final double pulseValue) {
         final double skinVariability = skinConductance.addValue(skinResistanceValue);
         final double oxygenVariability = oxygenSaturation.addValue(oxygenSaturationValue);
@@ -34,6 +40,9 @@ public class StressIndicator {
         DecisionMaking.getInstance().onEnter(0, pulseValue, pulseVariability, oxygenSaturationValue, oxygenVariability, skinResistanceValue, skinVariability);
     }
 
+    /**
+     * Saves the average values for the different average values.
+     */
     public void onTearDown() {
         skinConductance.endSession();
         oxygenSaturation.endSession();

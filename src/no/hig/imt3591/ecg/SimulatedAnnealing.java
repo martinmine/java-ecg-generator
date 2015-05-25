@@ -9,13 +9,13 @@ import java.util.Random;
  */
 public class SimulatedAnnealing implements IRDetection {
 
-    private List<Point.Double> observations;
+    private final List<Point.Double> observations;
     private int currentStateIndex;
-    private Random random;
+    private final Random random;
 
-    private double initialTemperature;
-    private double coolingRate;
-    private double temperatureLimit;
+    private final double initialTemperature;
+    private final double coolingRate;
+    private final double temperatureLimit;
 
     public SimulatedAnnealing(List<Point.Double> list, double temperature, double coolingRate, double temperatureLimit) {
         this.random = new Random();

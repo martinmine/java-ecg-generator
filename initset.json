@@ -1,12 +1,12 @@
 [
     {
-        "cardiacEvent": 0,
-        "pulse": 50,
-        "pulseChange": 0.3,
-        "oxygen": 0.3,
-        "oxygenChange": 0.3,
-        "skin": 0.5,
-        "skinChange": 0.2,
+        "cardiacEvent": 0.0,
+        "pulse": 60.0,
+        "pulseChange": 1.0,
+        "oxygen": 20.0,
+        "oxygenChange": 1.0,
+        "skin": 1.0,
+        "skinChange": 60.0,
         "result": "nothing"
     },{
         "cardiacEvent": 1,

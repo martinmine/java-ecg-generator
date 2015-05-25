@@ -20,7 +20,7 @@ public interface EcgProvider {
     public boolean getPeakDetectionMethod();
     public double getSATemperature();
     public double getSATemperatureLimit();
-    public double getSAcoolDownRate();
+    public double getSACoolDownRate();
     public int getObservationLimit();
     public int getSamplingFrequency();
 }
